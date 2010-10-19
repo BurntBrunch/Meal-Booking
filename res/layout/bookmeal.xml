@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="wrap_content" android:layout_height="fill_parent">
+
+
+
+
+
+
+<RelativeLayout android:id="@+id/RelativeLayout01" android:layout_width="wrap_content" android:layout_height="wrap_content"></RelativeLayout>
+<TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_below="@+id/RelativeLayout01" android:text="@string/mealType" android:textSize="7pt" android:id="@+id/MealLabel"></TextView>
+<Spinner android:layout_height="wrap_content" android:layout_below="@+id/MealLabel" android:id="@+id/MealSpinner" android:layout_width="fill_parent" android:layout_marginBottom="2pt"></Spinner>
+<TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_below="@+id/MealSpinner" android:id="@+id/DietaryLabel" android:text="@string/dietaryLabel" android:textSize="7pt"></TextView>
+<Spinner android:layout_height="wrap_content" android:layout_below="@+id/DietaryLabel" android:layout_width="fill_parent" android:id="@+id/DietarySpinner"></Spinner>
+
+<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_below="@+id/DietarySpinner" android:layout_centerInParent="false" android:id="@+id/DietaryInfoEditText" android:hint="@string/dietaryInfoLabel"></EditText>
+<EditText android:layout_height="wrap_content" android:layout_below="@+id/DietaryInfoEditText" android:hint="@string/bookingInformation" android:id="@+id/InformationEditText" android:layout_width="fill_parent"></EditText>
+<Button android:layout_height="wrap_content" android:layout_below="@+id/InformationEditText" android:layout_centerHorizontal="true" android:id="@+id/BookButton" android:text="@string/book" android:layout_width="fill_parent"></Button>
+</RelativeLayout>

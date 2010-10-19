@@ -1,5 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, ViewMeals!</string>
+    
     <string name="app_name">Meal Booking</string>
+<string name="initialLoginMessage">Please enter your card number and password below:</string>
+<string name="cardnumberHint">Card number</string>
+<string name="passwordHint">Password</string>
+<string name="loginRadioButton">Log me in automatically</string><string name="loginButton">Login</string>
+<string name="loginError">Invalid card number or password</string>
+<string name="viewMenu">View menu</string>
+<string name="viewInfo">View info</string>
+
+<string name="book">Book</string>
+<string name="cancel">Cancel booking</string>
+<string name="changeBooking">Change booking</string>
+
+<string name="mealType">Meal: </string>
+<string name="mealPrompt">Type of meal</string>
+<string name="dietaryLabel">Dietary requirements:</string>
+<string name="dietaryInfoLabel">Additional dietary information</string>
+<string name="bookingInformation">Additional information</string>
+
+<string name="bookFail">Could not book this meal!</string>
+<string name="bookSuccess">Booking was successful!</string>
+<string name="bookCannot">Booking for this meal has been disabled</string>
+<string name="bookFull">This sitting has been fully booked</string>
+<string name="request">Processing request</string>
+<string name="bookCancel">Cancelling meal</string>
+<string name="guestsNotImplemented">Booking guests is not possible at this time.</string>
+<string name="requestFail">Request failed</string>
 </resources>
