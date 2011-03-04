@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -52,6 +53,15 @@ public class Login extends Activity {
 		}
 	}
 	
+	private class CheckboxChangeListener implements CompoundButton.OnCheckedChangeListener {
+		@Override
+		public void onCheckedChanged(CompoundButton buttonView,
+				boolean isChecked) {
+			if (buttonView == automaticLogin && !isChecked)
+				Login.this.removeSettings();
+		}
+	}
+	
 	private void onTaskEnd(boolean res)
 	{
 		TextView message = (TextView) findViewById(R.id.MessageTextView);
@@ -87,6 +97,8 @@ public class Login extends Activity {
         
         Button loginButton = (Button) findViewById(R.id.LoginButton);
         loginButton.setOnClickListener(new LoginButtonListener());
+        
+        automaticLogin.setOnCheckedChangeListener(new CheckboxChangeListener());
         
         if(automaticLogin.isChecked())
         	new LoginButtonListener().onClick(loginButton);
