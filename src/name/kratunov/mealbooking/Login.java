@@ -10,14 +10,14 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.RadioButton;
 import android.widget.TextView;
 
 public class Login extends Activity {
 
 	private EditText cardnumber, password;
-	private RadioButton automaticLogin ;
+	private CheckBox automaticLogin ;
     
 	final class LoginTask extends AsyncTask<String, Void, Boolean>
 	{
@@ -81,7 +81,7 @@ public class Login extends Activity {
         
         cardnumber = (EditText) findViewById(R.id.CardNumberEditText);
         password = (EditText) findViewById(R.id.PasswordEditText);
-        automaticLogin = (RadioButton) findViewById(R.id.AutomaticLoginRadioButton);
+        automaticLogin = (CheckBox) findViewById(R.id.AutomaticLoginCheckboxButton);
         
         restoreSettings();
         

@@ -1,6 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?><RelativeLayout android:id="@+id/RelativeLayout01" android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android"><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/MessageTextView" android:textSize="8pt" android:text="@string/initialLoginMessage"></TextView>
-<EditText android:layout_below="@+id/MessageTextView" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/CardNumberEditText" android:inputType="number" android:hint="@string/cardnumberHint"></EditText>
-<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/PasswordEditText" android:inputType="textPassword" android:layout_below="@+id/CardNumberEditText" android:hint="@string/passwordHint"></EditText>
-<RadioButton android:layout_height="wrap_content" android:layout_below="@+id/PasswordEditText" android:id="@+id/AutomaticLoginRadioButton" android:text="@string/loginRadioButton" android:layout_width="fill_parent"></RadioButton><Button android:layout_below="@+id/AutomaticLoginRadioButton" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/LoginButton" android:text="@string/loginButton"></Button>
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@+id/RelativeLayout01"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	<TextView android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:id="@+id/MessageTextView"
+		android:textSize="8pt" android:text="@string/initialLoginMessage"></TextView>
+	<EditText android:layout_below="@+id/MessageTextView"
+		android:layout_height="wrap_content" android:layout_width="fill_parent"
+		android:id="@+id/CardNumberEditText" android:inputType="number"
+		android:hint="@string/cardnumberHint"></EditText>
+	<EditText android:layout_height="wrap_content"
+		android:layout_width="fill_parent" android:id="@+id/PasswordEditText"
+		android:inputType="textPassword" android:layout_below="@+id/CardNumberEditText"
+		android:hint="@string/passwordHint"></EditText>
+	<CheckBox android:layout_height="wrap_content"
+		android:layout_below="@+id/PasswordEditText" android:text="@string/loginRadioButton" android:layout_width="fill_parent" android:id="@+id/AutomaticLoginCheckboxButton">
+	</CheckBox>
+		<Button android:layout_below="@+id/AutomaticLoginCheckboxButton"
+			android:layout_height="wrap_content" android:layout_width="fill_parent"
+			android:id="@+id/LoginButton" android:text="@string/loginButton"></Button>
 
 </RelativeLayout>

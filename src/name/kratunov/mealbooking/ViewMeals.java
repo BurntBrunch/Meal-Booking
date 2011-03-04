@@ -32,9 +32,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 public class ViewMeals extends Activity {
-    /** Called when the activity is first created. */
 	final private String logtag = "ViewMeals";
-	
 	final public int MENU_MENU = 0, MENU_INFO = 1, MENU_BOOK = 2, MENU_CANCEL = 3,
 		MENU_CHANGE = 4, MENU_ITEMS = 5;
 	
@@ -142,6 +140,7 @@ public class ViewMeals extends Activity {
 		}
 	}
 	
+	// Background task to cancel a meal
 	private class CancelMealTask extends AsyncTask<Meal,Void,Boolean>
 	{
 		private Meal meal;
@@ -319,6 +318,7 @@ public class ViewMeals extends Activity {
     			int pos = intent.getIntExtra("arrayIdx", -1);
     			if(pos!=-1)
     			{
+    				// Update the list
     				Meal meal = meals.get(pos);
     				meal.can_book = false;
     				meal.can_cancel = true;
