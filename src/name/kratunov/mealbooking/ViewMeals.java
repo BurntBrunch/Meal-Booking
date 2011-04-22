@@ -46,10 +46,10 @@ public class ViewMeals extends Activity {
 	private ListView mealsListView;
 	
 	private class LegendClickListener implements OnClickListener
-	{
+	{	
 		@Override
 		public void onClick(View v) {
-			AlertDialog.Builder dlg = new AlertDialog.Builder(ViewMeals.this);
+			AlertDialog.Builder builder = new AlertDialog.Builder(ViewMeals.this);
 			Spanned msg = Html.fromHtml("<img src=\"menu\"> View menu <br>" +
 					"<img src=\"book_allowed\"> Booking is allowed <br>" +
 					"<img src=\"book_full\"> Sitting is fully booked <br>" +
@@ -62,9 +62,16 @@ public class ViewMeals extends Activity {
 					new LegendImageFormatter(), null);
 			
 			
-			dlg.setMessage(msg);
-			dlg.show();
+			builder.setMessage(msg).setOnCancelListener(new DialogInterface.OnCancelListener(){
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					dialog.dismiss();
+				}
+			}).setCancelable(true);
+			AlertDialog dlg = builder.create();
+			dlg.setCanceledOnTouchOutside(true);
 			
+			dlg.show();
 		}
 	}
 	
