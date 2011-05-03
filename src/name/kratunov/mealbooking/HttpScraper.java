@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
+
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -29,6 +31,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import android.content.ContentValues;
 import android.util.Log;
 
 public class HttpScraper {
@@ -308,8 +311,24 @@ public class HttpScraper {
 				meal.has_info = true;
 			
 			meals.add(meal);
+			addToContentProvider(meal);
 		}
 		return meals;
+	}
+	private void addToContentProvider(Meal meal)
+	{
+		ContentValues vals = new ContentValues();
+		vals.put(MealsMetadata.ID, meal.id);
+		vals.put(MealsMetadata.DATE, meal.date);
+		vals.put(MealsMetadata.TIME, meal.time);
+		vals.put(MealsMetadata.TITLE, meal.sitting);
+		vals.put(MealsMetadata.SPACES, meal.spaces);
+		vals.put(MealsMetadata.MAXIMUM_GUESTS, meal.guests);
+		vals.put(MealsMetadata.BOOKED_GUESTS, meal.booked);
+		vals.put(MealsMetadata.MENU, meal.getMenuString(true));
+		vals.put(MealsMetadata.EXTRA_INFO, meal.info);
+		
+		Application.getContext().getContentResolver().insert(MealsMetadata.CONTENT_URI, vals);
 	}
 	private Meal getDetails(Meal meal)
 	{
