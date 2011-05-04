@@ -28,9 +28,9 @@ final public class MealsContentProviderHelpers {
         /**
          * The default sort order for this table
          */
-        public static final String DEFAULT_SORT_ORDER = "date DESC";
+        public static final String DEFAULT_SORT_ORDER = "_id ASC";
 
-		static public final String ID = "id", _ID = ID, DATE = "date", TIME = "time",
+		static public final String _ID = "_id", ID = _ID, DATE = "date", TIME = "time",
 				TITLE = "title", SPACES = "spaces",
 				MAXIMUM_GUESTS = "max_guests", BOOKED_GUESTS = "booked_guests",
 				MENU = "menu", EXTRA_INFO = "info", CAN_BOOK = "can_book", 

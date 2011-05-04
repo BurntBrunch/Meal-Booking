@@ -41,9 +41,9 @@ public class MealsContentProvider extends ContentProvider {
 					MealsMetadata.BOOKED_GUESTS + " INTEGER NOT NULL," +
 					MealsMetadata.MENU + " STRING," +
 					MealsMetadata.EXTRA_INFO + " STRING," +
-					MealsMetadata.CAN_BOOK + " BOOLEAN," + 
-					MealsMetadata.CAN_CANCEL + " BOOLEAN," + 
-					MealsMetadata.CAN_CHANGE + " BOOLEAN);");
+					MealsMetadata.CAN_BOOK + " INTEGER," + 
+					MealsMetadata.CAN_CANCEL + " INTEGER," + 
+					MealsMetadata.CAN_CHANGE + " INTEGER);");
 		}
 
 		@Override
@@ -73,6 +73,9 @@ public class MealsContentProvider extends ContentProvider {
 		sDefaultProjectionMap.put(MealsMetadata.BOOKED_GUESTS, MealsMetadata.BOOKED_GUESTS);
 		sDefaultProjectionMap.put(MealsMetadata.MENU, MealsMetadata.MENU);
 		sDefaultProjectionMap.put(MealsMetadata.EXTRA_INFO, MealsMetadata.EXTRA_INFO);
+		sDefaultProjectionMap.put(MealsMetadata.CAN_BOOK, MealsMetadata.CAN_BOOK);
+		sDefaultProjectionMap.put(MealsMetadata.CAN_CANCEL, MealsMetadata.CAN_CANCEL);
+		sDefaultProjectionMap.put(MealsMetadata.CAN_CHANGE, MealsMetadata.CAN_CHANGE);
 	}
 	
 	@Override

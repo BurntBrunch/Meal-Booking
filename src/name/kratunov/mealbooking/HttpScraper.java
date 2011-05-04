@@ -237,7 +237,7 @@ public class HttpScraper {
 			Log.d(logtag, "Got " + rows.size() + " rows");
 
 		List<Meal> meals = new ArrayList<Meal>();
-
+		Application.getContext().getContentResolver().delete(MealsMetadata.CONTENT_URI, "1=1", null);
 		
 		for (Element row: rows) {
 			Meal meal = new Meal();
@@ -327,6 +327,9 @@ public class HttpScraper {
 		vals.put(MealsMetadata.BOOKED_GUESTS, meal.booked);
 		vals.put(MealsMetadata.MENU, meal.getMenuString(true));
 		vals.put(MealsMetadata.EXTRA_INFO, meal.info);
+		vals.put(MealsMetadata.CAN_BOOK, meal.can_book ? 1 : 0);
+		vals.put(MealsMetadata.CAN_CANCEL, meal.can_cancel ? 1 : 0);
+		vals.put(MealsMetadata.CAN_CHANGE, meal.can_change ? 1 : 0);
 		
 		Application.getContext().getContentResolver().insert(MealsMetadata.CONTENT_URI, vals);
 	}

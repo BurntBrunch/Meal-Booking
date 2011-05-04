@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
 import name.kratunov.mealbooking.R.drawable;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -13,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,10 +27,16 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
+import android.widget.SimpleCursorAdapter.ViewBinder;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class ViewMeals extends Activity {
@@ -41,7 +49,7 @@ public class ViewMeals extends Activity {
 	private List<Meal> meals;
 	private List<Map<String, Object>> meals_list = 
 		new ArrayList<Map<String, Object>>();
-	private DecapsulatedSimpleAdapter adapter;
+	private SimpleCursorAdapter adapter;
 	
 	private ListView mealsListView;
 	
@@ -249,26 +257,120 @@ public class ViewMeals extends Activity {
     	
     	registerForContextMenu(mealsListView);
     	mealsListView.setItemsCanFocus(true);
+    	mealsListView.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
     	
-    	adapter = new DecapsulatedSimpleAdapter(this, meals_list, R.layout.meal_list_item,
-    			new String[] {ListItemId.ItemStatus.toString(),
-    						  ListItemId.ItemText.toString(), 
-    						  ListItemId.ItemMenu.toString(),
-    						  ListItemId.ItemGuest.toString()},
-    			new int[] {R.id.bookImage, R.id.title, R.id.menuImage, R.id.guestsImage});
-    	adapter.setOnClickListener(new ItemButtonsClickListener());
-    	
-    	adapter.setOnLongClickListener(new OnLongClickListener() {
-			
+		Cursor cursor = getContentResolver().query(MealsMetadata.CONTENT_URI,
+				null, null, null, null);
+		adapter = new SimpleCursorAdapter(this, R.layout.meal_list_item,
+				cursor, 
+				new String[] { MealsMetadata.CAN_BOOK, MealsMetadata.TITLE, MealsMetadata.MENU,
+						MealsMetadata.BOOKED_GUESTS }, 
+				new int[] { R.id.bookImage, R.id.title, R.id.menuImage, R.id.guestsImage });
+		
+		final ViewBinder mealsViewBinder = new ViewBinder() {
 			@Override
-			public boolean onLongClick(View v) {
+			public boolean setViewValue(final View view, final Cursor cursor,
+					final int columnIndex)
+			{
+				final String colName = cursor.getColumnName(columnIndex);
+				final String date = cursor.getString(cursor.getColumnIndex(MealsMetadata.DATE));
+				final String time = cursor.getString(cursor.getColumnIndex(MealsMetadata.TIME));
+				final String title = cursor.getString(cursor.getColumnIndex(MealsMetadata.TITLE));
+				
+				final boolean can_book = cursor.getInt(cursor
+						.getColumnIndex(MealsMetadata.CAN_BOOK)) == 1;
+				final boolean can_cancel = cursor.getInt(cursor
+						.getColumnIndex(MealsMetadata.CAN_CANCEL)) == 1;
+				final int spaces = cursor.getInt(cursor.getColumnIndex(MealsMetadata.SPACES));
+				
+				/* Handle the images */
+				if (view instanceof ImageView)
+				{
+					final ImageView imgView = (ImageView) view;
+					
+					if(colName.equals(MealsMetadata.MENU) && view instanceof ImageView)
+					{
+						imgView.setImageResource(R.drawable.menu);
+						
+						imgView.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v)
+							{
+								showMenuDialog(cursor.getPosition());
+							}
+						});
+					}
+					else if (colName.equals(MealsMetadata.BOOKED_GUESTS))
+					{
+						imgView.setImageResource(R.drawable.guests_forbidden);
+					}
+					else if (colName.equals(MealsMetadata.CAN_BOOK))
+					{
+						imgView.setImageResource(R.drawable.guests_forbidden);
+						if(spaces == 0)
+							imgView.setImageResource(drawable.book_full);
+						else if(can_cancel)
+							imgView.setImageResource(drawable.book_cancel);
+						else if(can_book)
+							imgView.setImageResource(drawable.book_allowed);
+						else
+							imgView.setImageResource(drawable.book_forbidden);
+					}
+					
+					return true;
+				}
+				
+				/* Handle the text */
+				if (view instanceof TextView)
+				{
+					StringBuilder strBld = new StringBuilder(date);
+					strBld.append(" ");
+					strBld.append(time);
+					strBld.append("\n");
+					strBld.append(title);
+					
+					((TextView) view).setText(strBld.toString());
+					
+					if(can_book && spaces != 0)
+						view.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v)
+							{
+								bookItem(cursor.getPosition());
+							}});
+					else if (can_cancel)
+						view.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v)
+							{
+								cancelItem(cursor.getPosition());
+							}});
+					else if(spaces == 0)
+						Toast.makeText(ViewMeals.this, R.string.bookFull, Toast.LENGTH_SHORT).show();
+					else if (!can_book)
+						Toast.makeText(ViewMeals.this, R.string.bookCannot, Toast.LENGTH_SHORT).show();
+					
+					return true;
+				}
+				
 				return false;
 			}
-		});
-    	
+			
+		};
+		adapter.setViewBinder(mealsViewBinder);
+
     	Button legend = (Button) findViewById(R.id.LegendButton);
     	legend.setOnClickListener(new LegendClickListener());
     	mealsListView.setAdapter(adapter);
+    	
+    	mealsListView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position,
+					long id)
+			{
+				Log.i(logtag, "Clicked on view of type: " + view.getClass().getCanonicalName());
+			}
+		});   	
     }
     
     // Hacky way of getting click events from the actual views in the items
@@ -455,7 +557,7 @@ public class ViewMeals extends Activity {
     	public void onPreExecute()
     	{
     		dlg = ProgressDialog.show(ViewMeals.this, "", 
-    				ViewMeals.this.getResources().getString(R.string.request), 
+    				ViewMeals.this.getString(R.string.request), 
     				true, true);
 			dlg.setOnCancelListener(new OnCancelListener() {
 				
@@ -463,6 +565,7 @@ public class ViewMeals extends Activity {
 				public void onCancel(DialogInterface dialog) {
 					Log.d(logtag, "Cancelling dialog");
 					GetDetailsTask.this.cancel(true);
+					dlg.dismiss();
 				}
 			});
 			dlg.show();

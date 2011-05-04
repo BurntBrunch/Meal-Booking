@@ -3,17 +3,16 @@
 
 <LinearLayout android:id="@+id/LinearLayout01"
 	android:layout_width="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="wrap_content" android:focusable="false" android:focusableInTouchMode="false" android:descendantFocusability="beforeDescendants" android:clickable="false">
+	android:layout_height="wrap_content" android:focusable="false" android:focusableInTouchMode="false" android:descendantFocusability="beforeDescendants" android:clickable="false" android:addStatesFromChildren="true">
 	<ImageView android:src="@drawable/book_allowed"
 		android:adjustViewBounds="true" android:layout_height="wrap_content"
 		android:layout_width="wrap_content" android:scaleType="fitXY"
 		android:layout_gravity="center_vertical" android:maxWidth="40dp"
 		android:id="@+id/bookImage" android:clickable="true"></ImageView>
-	<TextView android:layout_width="wrap_content"
-		android:layout_height="wrap_content" android:layout_marginLeft="2pt"
+	<TextView android:layout_height="wrap_content" android:layout_marginLeft="2pt"
 		android:id="@+id/title" android:textSize="7pt"
-		android:layout_toRightOf="@+id/bookedNum" android:layout_gravity="top"
-		android:maxWidth="190dp" android:text="Sun, 00/00/00 Dinner (FORMAL HALL)" android:clickable="false" android:focusable="false" android:focusableInTouchMode="false"></TextView>
+		android:layout_gravity="top"
+		android:maxWidth="190dp" android:text="Sun, 00/00/00 Dinner (FORMAL HALL)" android:clickable="false" android:focusable="false" android:focusableInTouchMode="false" android:layout_width="fill_parent" android:layout_weight="1"></TextView>
 	<ImageView android:layout_toRightOf="@+id/title" android:src="@drawable/menu"
 		android:id="@+id/menuImage" android:layout_width="wrap_content"
 		android:adjustViewBounds="true" android:maxWidth="40dp"
