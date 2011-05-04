@@ -12,7 +12,13 @@
         </activity>
 
    <activity android:label="@string/app_name" android:name=".ViewMeals"></activity>
-<activity android:name=".BookMeal" android:label="@string/app_name"></activity>
+<activity android:name=".BookMeal" android:label="@string/app_name">
+    <intent-filter>
+        <category android:name="android.intent.category.DEFAULT"></category>
+        <action android:name="name.kratunov.mealbooking.BOOK_MEAL"></action>
+        <data android:mimeType="vnd.android.cursor.item/vnd.mealbooking.meal"></data>
+    </intent-filter>
+</activity>
 <provider android:name=".MealsContentProvider" android:authorities="name.kratunov.mealbooking.mealsprovider"></provider>
 </application>
 

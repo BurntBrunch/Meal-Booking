@@ -31,7 +31,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.net.Uri;
 import android.util.Log;
 
 public class HttpScraper {
@@ -237,7 +239,10 @@ public class HttpScraper {
 			Log.d(logtag, "Got " + rows.size() + " rows");
 
 		List<Meal> meals = new ArrayList<Meal>();
-		Application.getContext().getContentResolver().delete(MealsMetadata.CONTENT_URI, "1=1", null);
+		
+		ContentResolver resolver = Application.getContext().getContentResolver();
+		resolver.delete(MealsMetadata.CONTENT_URI, "1=1", null);
+		resolver.notifyChange(MealsMetadata.CONTENT_URI, null);
 		
 		for (Element row: rows) {
 			Meal meal = new Meal();
@@ -331,7 +336,10 @@ public class HttpScraper {
 		vals.put(MealsMetadata.CAN_CANCEL, meal.can_cancel ? 1 : 0);
 		vals.put(MealsMetadata.CAN_CHANGE, meal.can_change ? 1 : 0);
 		
-		Application.getContext().getContentResolver().insert(MealsMetadata.CONTENT_URI, vals);
+		ContentResolver resolver = Application.getContext().getContentResolver();
+		
+		resolver.insert(MealsMetadata.CONTENT_URI, vals);
+		resolver.notifyChange(MealsMetadata.CONTENT_URI, null);
 	}
 	private Meal getDetails(Meal meal)
 	{
@@ -428,7 +436,7 @@ public class HttpScraper {
 		
 		return meal;
 	}
-	protected BookingInfo getBookingInfo(final Meal meal, boolean useChangeUrl)
+	protected BookingInfo getBookingInfo(final int id, boolean useChangeUrl)
 	{
 		HttpPost request;
 		if(useChangeUrl)
@@ -439,7 +447,7 @@ public class HttpScraper {
 		request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
-		params.add(new BasicNameValuePair("sitUniq", ""+meal.id));
+		params.add(new BasicNameValuePair("sitUniq", Integer.toString(id)));
 		params.add(new BasicNameValuePair("btnBook", "Book"));
 
 		String bookData = URLEncodedUtils.format(params, "UTF-8");
@@ -487,10 +495,15 @@ public class HttpScraper {
 		
 		res.dietary_requirements = diets;
 		res.meals = meals;
-		res.meal = meal;
 		
 		return res;
 	}
+	
+	protected BookingInfo getBookingInfo(final Uri uri, boolean useChangeUrl)
+	{
+		return getBookingInfo(Integer.parseInt(uri.getLastPathSegment()), useChangeUrl);
+	}
+	
 	public boolean bookMeal(final BookingInfo info)
 	{
 		HttpPost request = new HttpPost(baseUrl+bookPostUrl);

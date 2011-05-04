@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -151,7 +152,6 @@ public class ViewMeals extends Activity {
 		{
 			Log.d(logtag, "Dismissing progress dialog");
 			dlg.dismiss();
-			ViewMeals.this.finalizeInit();
 		}
 	}
 	
@@ -245,15 +245,15 @@ public class ViewMeals extends Activity {
         
         GetMealsTask task = new GetMealsTask();
         task.execute();
+        initializeViews();
     }
     
     // Called from GetMealsTask.onPostExecute
-    private void finalizeInit()
+    private void initializeViews()
     {
     	Log.d(logtag, "Generating list and setting view");
     	setContentView(R.layout.meals_list);
     	mealsListView = (ListView) findViewById(R.id.MealsListView);
-    	refreshList();
     	
     	registerForContextMenu(mealsListView);
     	mealsListView.setItemsCanFocus(true);
@@ -277,12 +277,32 @@ public class ViewMeals extends Activity {
 				final String time = cursor.getString(cursor.getColumnIndex(MealsMetadata.TIME));
 				final String title = cursor.getString(cursor.getColumnIndex(MealsMetadata.TITLE));
 				
+				final int id = cursor.getInt(cursor.getColumnIndex(MealsMetadata._ID));
+				
 				final boolean can_book = cursor.getInt(cursor
 						.getColumnIndex(MealsMetadata.CAN_BOOK)) == 1;
 				final boolean can_cancel = cursor.getInt(cursor
 						.getColumnIndex(MealsMetadata.CAN_CANCEL)) == 1;
 				final int spaces = cursor.getInt(cursor.getColumnIndex(MealsMetadata.SPACES));
 				
+				OnClickListener bookCancelListener = new OnClickListener() {
+					@Override
+					public void onClick(View v)
+					{
+						Uri mealUri = Uri.withAppendedPath(
+								MealsMetadata.CONTENT_URI,
+								Integer.toString(id));
+						
+						if(can_book && spaces != 0)
+							bookItem(mealUri);
+						else if (can_cancel)
+							cancelItem(cursor.getPosition());
+						else if(spaces == 0)
+							Toast.makeText(ViewMeals.this, R.string.bookFull, Toast.LENGTH_SHORT).show();
+						else if (!can_book)
+							Toast.makeText(ViewMeals.this, R.string.bookCannot, Toast.LENGTH_SHORT).show();
+					}};
+					
 				/* Handle the images */
 				if (view instanceof ImageView)
 				{
@@ -315,6 +335,8 @@ public class ViewMeals extends Activity {
 							imgView.setImageResource(drawable.book_allowed);
 						else
 							imgView.setImageResource(drawable.book_forbidden);
+						
+						imgView.setOnClickListener(bookCancelListener);
 					}
 					
 					return true;
@@ -331,24 +353,7 @@ public class ViewMeals extends Activity {
 					
 					((TextView) view).setText(strBld.toString());
 					
-					if(can_book && spaces != 0)
-						view.setOnClickListener(new OnClickListener() {
-							@Override
-							public void onClick(View v)
-							{
-								bookItem(cursor.getPosition());
-							}});
-					else if (can_cancel)
-						view.setOnClickListener(new OnClickListener() {
-							@Override
-							public void onClick(View v)
-							{
-								cancelItem(cursor.getPosition());
-							}});
-					else if(spaces == 0)
-						Toast.makeText(ViewMeals.this, R.string.bookFull, Toast.LENGTH_SHORT).show();
-					else if (!can_book)
-						Toast.makeText(ViewMeals.this, R.string.bookCannot, Toast.LENGTH_SHORT).show();
+					view.setOnClickListener(bookCancelListener);
 					
 					return true;
 				}
@@ -374,7 +379,7 @@ public class ViewMeals extends Activity {
     }
     
     // Hacky way of getting click events from the actual views in the items
-    private class ItemButtonsClickListener implements OnClickListener
+    /*private class ItemButtonsClickListener implements OnClickListener
     {
 
 		@Override
@@ -408,7 +413,7 @@ public class ViewMeals extends Activity {
 			}
 		}
     	
-    }
+    }*/
     
     // Process the result of the BookMeal activity
     @Override
@@ -461,17 +466,21 @@ public class ViewMeals extends Activity {
    		if(!meal.has_info)
    			menu.setGroupEnabled(MENU_INFO, false);
     	if(meal.can_book)
-    		menu.add(MENU_BOOK, info.position, 0, R.string.book);
+    		menu.add(MENU_BOOK, meal.id, 0, R.string.book);
     	if(meal.can_change)
-    		menu.add(MENU_CHANGE, info.position, 0, R.string.changeBooking);
+    		menu.add(MENU_CHANGE, meal.id, 0, R.string.changeBooking);
     	if(meal.can_cancel)
-    		menu.add(MENU_CANCEL, info.position, 0, R.string.cancel);
+    		menu.add(MENU_CANCEL, meal.id, 0, R.string.cancel);
     }
     
     @Override
     public boolean onContextItemSelected(MenuItem item)
     {
     	super.onContextItemSelected(item);
+
+		Uri mealUri = Uri.withAppendedPath(MealsMetadata.CONTENT_URI,
+				Integer.toString(item.getItemId()));
+		
     	switch(item.getGroupId())
     	{
     	case MENU_MENU: {
@@ -483,7 +492,8 @@ public class ViewMeals extends Activity {
     		break;
     		}
     	case MENU_BOOK: {
-    		bookItem(item.getItemId());
+    		
+    		bookItem(mealUri);
     		break;
     		}
     	case MENU_CANCEL: {
@@ -491,7 +501,7 @@ public class ViewMeals extends Activity {
     		break;
     	}
     	case MENU_CHANGE: {
-    		changeItem(item.getItemId());
+    		changeItem(mealUri);
     		break;
     	}
     	
@@ -499,39 +509,22 @@ public class ViewMeals extends Activity {
     	return true;
     }
     
-    private void changeItem(int pos)
+    private void changeItem(Uri mealUri)
     {
-    	Meal meal = meals.get(pos);
-    	if(meal.can_change)
-    	{
-    		Intent intent = new Intent(this, BookMeal.class);
-    		intent.putExtra("id", meal.id);
-    		intent.putExtra("arrayIdx", pos);
-    		intent.putExtra("change", true);
-    		
-    		startActivityForResult(intent, MENU_CHANGE);
-    	}
-    	else if(meal.spaces == 0)
-    		Toast.makeText(this, R.string.bookFull, Toast.LENGTH_SHORT).show();
-    	else
-    		Toast.makeText(this, R.string.bookCannot, Toast.LENGTH_SHORT).show();
+		Intent intent = new Intent("name.kratunov.mealbooking.CHANGE_MEAL");
+		intent.putExtra("id", Integer.parseInt(mealUri.getLastPathSegment()));
+		intent.setData(mealUri);
+
+		startActivityForResult(intent, MENU_CHANGE);
     }
-    // Starts the BookMeal activity given an index in the meals list
-    private void bookItem(int pos)
+    // Starts the BookMeal activity given an URI to a specific meal
+    private void bookItem(Uri mealUri)
     {
-    	Meal meal = meals.get(pos);
-    	if(meal.can_book && meal.spaces > 0)
-    	{
-    		Intent intent = new Intent(this, BookMeal.class);
-    		intent.putExtra("id", meal.id);
-    		intent.putExtra("arrayIdx", pos);
-    		
-    		startActivityForResult(intent, MENU_BOOK);
-    	}
-    	else if(meal.spaces == 0)
-    		Toast.makeText(this, R.string.bookFull, Toast.LENGTH_SHORT).show();
-    	else
-    		Toast.makeText(this, R.string.bookCannot, Toast.LENGTH_SHORT).show();		
+		Intent intent = new Intent("name.kratunov.mealbooking.BOOK_MEAL");
+		intent.putExtra("id", Integer.parseInt(mealUri.getLastPathSegment()));
+		intent.setData(mealUri);
+		
+		startActivityForResult(intent, MENU_BOOK);		
     }
     // Starts the CancelMealTask background task given an index in the meals list
     private void cancelItem(int pos)
