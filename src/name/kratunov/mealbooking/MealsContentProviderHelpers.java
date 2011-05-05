@@ -9,6 +9,8 @@ final public class MealsContentProviderHelpers {
 	public static final class MealsMetadata implements BaseColumns {
         // This class cannot be instantiated
         private MealsMetadata() {}
+        
+        public static final String FRAGMENT_MENU = "menu", FRAGMENT_INFO = "info";
 
         /**
          * The content:// style URL for this table

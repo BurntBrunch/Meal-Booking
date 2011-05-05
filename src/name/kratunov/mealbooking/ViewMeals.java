@@ -10,6 +10,7 @@ import name.kratunov.mealbooking.R.drawable;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -199,7 +200,6 @@ public class ViewMeals extends Activity {
 				meal.can_change = false;
 				meal.can_cancel = false;
 				meal.booked = 0;
-				ViewMeals.this.refreshList();
 			}
 		}
 	}
@@ -264,6 +264,9 @@ public class ViewMeals extends Activity {
     	
 		Cursor cursor = getContentResolver().query(MealsMetadata.CONTENT_URI,
 				null, null, null, null);
+		
+		startManagingCursor(cursor);
+		
 		adapter = new SimpleCursorAdapter(this, R.layout.meal_list_item,
 				cursor, 
 				new String[] { MealsMetadata.CAN_BOOK, MealsMetadata.TITLE, MealsMetadata.MENU,
@@ -303,6 +306,7 @@ public class ViewMeals extends Activity {
 							Toast.makeText(ViewMeals.this, R.string.bookFull, Toast.LENGTH_SHORT).show();
 						else if (!can_book)
 							Toast.makeText(ViewMeals.this, R.string.bookCannot, Toast.LENGTH_SHORT).show();
+						
 					}};
 					
 				/* Handle the images */
@@ -381,24 +385,10 @@ public class ViewMeals extends Activity {
     	case MENU_BOOK: 
     	{
     		if(resultCode == BookMeal.BOOK_FAILURE)
-    		{
     			Toast.makeText(this, R.string.bookFail, Toast.LENGTH_SHORT).show();
-    		}
     		else if(resultCode == BookMeal.BOOK_SUCCESS)
-    		{
-    			int pos = intent.getIntExtra("arrayIdx", -1);
-    			if(pos!=-1)
-    			{
-    				// Update the list
-    				Meal meal = meals.get(pos);
-    				meal.can_book = false;
-    				meal.can_cancel = true;
-    				meal.can_change = true;
-    				
-    				refreshList();
-    			}
     			Toast.makeText(this, R.string.bookSuccess, Toast.LENGTH_SHORT).show();
-    		}
+    		
     		break;
     	}
     	}
@@ -530,25 +520,38 @@ public class ViewMeals extends Activity {
 		protected String doInBackground(Uri... params) {
 			assert params.length > 0;
 			Uri uri = params[0];
-			
-			HttpScraper scraper = HttpScraper.getInstance();
+			Uri.Builder bld = uri.buildUpon();
+			ContentResolver resolver = getContentResolver();
 			switch(type)
 			{
 			case MENU_MENU:
-	    		String[] menu = scraper.getMenu(uri); 
-	    		if(menu != null)
-	    		{
-		    		StringBuilder strBld = new StringBuilder();
-		    		for(String menuItem: menu)
-	    			{
-		    			strBld.append(menuItem);
-		    			strBld.append("\n");
-	    			}
-		    		return strBld.toString().trim();
-	    		}else
+			{
+				bld.fragment(MealsMetadata.FRAGMENT_MENU);
+				
+				Cursor c = resolver.query(bld.build(), null, null, null, null);
+				int colId = c.getColumnIndex(MealsMetadata.MENU);
+				
+				c.moveToFirst();
+				
+				if(!c.isAfterLast() && !c.isNull(colId))
+					return c.getString(colId);
+				else
 	    			return null;
+			}
 			case MENU_INFO:
-				return scraper.getInfo(uri);
+			{
+				bld.fragment(MealsMetadata.FRAGMENT_INFO);
+				
+				Cursor c = resolver.query(bld.build(), null, null, null, null);
+				int colId = c.getColumnIndex(MealsMetadata.EXTRA_INFO);
+				
+				c.moveToFirst();
+				
+				if(!c.isAfterLast() && !c.isNull(colId))
+					return c.getString(colId);
+				else
+	    			return null;
+			}
 			default:
 				Log.e(logtag, "Unknown type in GetDetailsTask");
 			}

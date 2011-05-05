@@ -16,6 +16,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 public class MealsContentProvider extends ContentProvider {
 	
@@ -165,7 +166,7 @@ public class MealsContentProvider extends ContentProvider {
 		case PATH_MEALS_ID:
 			queryBuilder.setProjectionMap(sDefaultProjectionMap);
 			queryBuilder.appendWhere(MealsMetadata.ID + "=" + uri.getPathSegments().get(1));
-			break;
+			break; 
 		default:
 			throw new IllegalArgumentException("The Uri could not be parsed: " + uri);
 		}
@@ -179,6 +180,45 @@ public class MealsContentProvider extends ContentProvider {
 
 		Cursor ret = queryBuilder.query(mDatabase.getReadableDatabase(),
 				projection, selection, selectionArgs, null, null, orderBy);
+		
+		/* When you use the _MENU and _INFO fragments, you're guaranteed to have 
+		 * the appropriate field in the cursor */
+		String fragment = uri.getFragment();
+		if(fragment != null)
+		{
+			int colIdx = -1;
+			if(fragment.equals(MealsMetadata.FRAGMENT_MENU))
+				colIdx = ret.getColumnIndexOrThrow(MealsMetadata.MENU);
+			else if(fragment.equals(MealsMetadata.FRAGMENT_INFO))
+				colIdx = ret.getColumnIndexOrThrow(MealsMetadata.EXTRA_INFO);
+			else return ret;
+			
+			ret.moveToFirst();
+			
+			while(!ret.isAfterLast())
+			{
+				boolean fetch = false;
+				
+				if(!ret.isNull(colIdx))
+					fetch = TextUtils.isEmpty(ret.getString(colIdx));
+				
+				if(fetch)
+				{
+					String[] menu = HttpScraper.getInstance().getMenu(uri);
+					ContentValues vals = new ContentValues();
+					String menuStr = Utils.concatStringArray(menu, '\n');
+					
+					vals.put(MealsMetadata.MENU, menuStr);
+					update(uri, vals, null, null);
+				}
+				
+				ret.moveToNext();
+			}
+			
+			// requery the database
+			ret = queryBuilder.query(mDatabase.getReadableDatabase(),
+				projection, selection, selectionArgs, null, null, orderBy);
+		}
 
 		return ret;
 	}
@@ -193,7 +233,6 @@ public class MealsContentProvider extends ContentProvider {
         case PATH_MEALS:
             count = db.update(MealsDatabase.DB_MEALS_TABLE, values, selection, selectionArgs);
             break;
-
         case PATH_MEALS_ID:
             String mealId = uri.getPathSegments().get(1);
             count = db.update(MealsDatabase.DB_MEALS_TABLE, values, MealsMetadata._ID + "=" + mealId

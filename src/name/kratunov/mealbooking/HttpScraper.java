@@ -229,6 +229,9 @@ public class HttpScraper {
 			return null;
 		}
 
+		if(html == null)
+			return null;
+		
 		Document doc = Jsoup.parse(html);
 		Elements rows = doc.select("table > tr.RowAS1");
 		//Log.v(logtag, html);
@@ -490,6 +493,7 @@ public class HttpScraper {
 		
 		res.dietary_requirements = diets;
 		res.meals = meals;
+		res.id = id;
 		
 		return res;
 	}
@@ -512,7 +516,7 @@ public class HttpScraper {
 		params.add(new BasicNameValuePair("txtSpecDietInfo", info.additional_dietary));
 		params.add(new BasicNameValuePair("txtXtraInfo", info.additional_info));
 		params.add(new BasicNameValuePair("hidXtra", ""));
-		params.add(new BasicNameValuePair("hidSit_Uniq", ""+info.meal.id));
+		params.add(new BasicNameValuePair("hidSit_Uniq", Integer.toString(info.id)));
 		if(info.secrets != null)
 			for(Entry<String, String> entry: info.secrets.entrySet())
 				params.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
@@ -531,6 +535,19 @@ public class HttpScraper {
 		String response = executeRequest(request, false);
 		
 		// TODO: Handle fail conditions
+		
+		ContentResolver resolver = Application.getContext().getContentResolver();
+		ContentValues vals = new ContentValues();
+		vals.put(MealsMetadata.CAN_BOOK, 0);
+		vals.put(MealsMetadata.CAN_CANCEL, 1);
+		vals.put(MealsMetadata.CAN_CHANGE, 1);
+		
+		Uri mealUri = Uri.withAppendedPath(MealsMetadata.CONTENT_URI, 
+				Integer.toString(info.id));
+		
+		resolver.update(mealUri, vals, null, null);
+		resolver.notifyChange(mealUri, null);
+		
 		return true;
 	}
 	public boolean cancelMeal(final Meal meal)

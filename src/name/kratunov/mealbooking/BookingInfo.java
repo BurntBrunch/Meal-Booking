@@ -3,7 +3,7 @@ package name.kratunov.mealbooking;
 import java.util.Map;
 
 public class BookingInfo {
-	Meal meal;
+	int id;
 	
 	// A Name - Value mapping
 	// Read-only values
