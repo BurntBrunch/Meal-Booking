@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout android:id="@+id/RelativeLayout01"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	xmlns:android="http://schemas.android.com/apk/res/android">
+	xmlns:android="http://schemas.android.com/apk/res/android" android:padding="5dp">
 	<TextView android:layout_width="wrap_content"
 		android:layout_height="wrap_content" android:id="@+id/MessageTextView"
-		android:textSize="8pt" android:text="@string/initialLoginMessage"></TextView>
+		android:text="@string/initialLoginMessage" android:layout_marginBottom="5dp" android:textSize="20dp" android:gravity="center"></TextView>
 	<EditText android:layout_below="@+id/MessageTextView"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
 		android:id="@+id/CardNumberEditText" android:inputType="number"
-		android:hint="@string/cardnumberHint"></EditText>
+		android:hint="@string/cardnumberHint" android:layout_marginBottom="5dp"></EditText>
 	<EditText android:layout_height="wrap_content"
 		android:layout_width="fill_parent" android:id="@+id/PasswordEditText"
 		android:inputType="textPassword" android:layout_below="@+id/CardNumberEditText"
@@ -18,6 +18,6 @@
 	</CheckBox>
 		<Button android:layout_below="@+id/AutomaticLoginCheckboxButton"
 			android:layout_height="wrap_content" android:layout_width="fill_parent"
-			android:id="@+id/LoginButton" android:text="@string/loginButton"></Button>
+			android:id="@+id/LoginButton" android:text="@string/loginButton" android:textSize="16dp"></Button>
 
 </RelativeLayout>
