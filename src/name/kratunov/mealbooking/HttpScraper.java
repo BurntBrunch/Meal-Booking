@@ -541,6 +541,7 @@ public class HttpScraper {
 		vals.put(MealsMetadata.CAN_BOOK, 0);
 		vals.put(MealsMetadata.CAN_CANCEL, 1);
 		vals.put(MealsMetadata.CAN_CHANGE, 1);
+		vals.put(MealsMetadata.BOOKED_GUESTS, 1);
 		
 		Uri mealUri = Uri.withAppendedPath(MealsMetadata.CONTENT_URI, 
 				Integer.toString(info.id));
@@ -550,16 +551,16 @@ public class HttpScraper {
 		
 		return true;
 	}
-	public boolean cancelMeal(final Meal meal)
+	public boolean cancelMeal(final int id)
 	{
-		assert meal != null && meal.id > 0;
+		assert id > 0;
 		HttpPost request = new HttpPost(baseUrl+cancelUrl);
 		
 		addCommonHeaders(request);
 		request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
-		params.add(new BasicNameValuePair("sitUniq", ""+meal.id));
+		params.add(new BasicNameValuePair("sitUniq", Integer.toString(id)));
 		params.add(new BasicNameValuePair("btnCancel", "Cancel"));
 
 		String cancelData = URLEncodedUtils.format(params, "UTF-8");
@@ -576,6 +577,23 @@ public class HttpScraper {
 		String response = executeRequest(request, false);
 		
 		// TODO: Handle fail conditions
+		ContentResolver resolver = Application.getContext().getContentResolver();
+		ContentValues vals = new ContentValues();
+		vals.put(MealsMetadata.CAN_BOOK, 1);
+		vals.put(MealsMetadata.CAN_CANCEL, 0);
+		vals.put(MealsMetadata.CAN_CHANGE, 0);
+		vals.put(MealsMetadata.BOOKED_GUESTS, 0);
+		
+		Uri mealUri = Uri.withAppendedPath(MealsMetadata.CONTENT_URI, 
+				Integer.toString(id));
+		
+		resolver.update(mealUri, vals, null, null);
+		resolver.notifyChange(mealUri, null);
 		return true;
+	}
+	
+	public boolean cancelMeal(final Uri uri)
+	{
+		return cancelMeal(Integer.parseInt(uri.getLastPathSegment()));
 	}
 }

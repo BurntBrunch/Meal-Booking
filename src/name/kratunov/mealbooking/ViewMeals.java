@@ -57,6 +57,7 @@ public class ViewMeals extends Activity {
 	private SimpleCursorAdapter adapter;
 	
 	private ListView mealsListView;
+	private Cursor cursor;
 	
 	private class LegendClickListener implements OnClickListener
 	{	
@@ -159,9 +160,8 @@ public class ViewMeals extends Activity {
 	}
 	
 	// Background task to cancel a meal
-	private class CancelMealTask extends AsyncTask<Meal,Void,Boolean>
+	private class CancelMealTask extends AsyncTask<Uri,Void,Boolean>
 	{
-		private Meal meal;
 		private ProgressDialog dlg;
 		@Override
 		public void onPreExecute()
@@ -180,27 +180,19 @@ public class ViewMeals extends Activity {
 		}
 		
 		@Override
-		public Boolean doInBackground(Meal... data)
+		public Boolean doInBackground(Uri... data)
 		{
 			assert data.length > 0;
 			
-			meal = data[0];
-	        HttpScraper scraper = HttpScraper.getInstance();
-			return scraper.cancelMeal(meal);
+			Uri uri = data[0];
+			return HttpScraper.getInstance().cancelMeal(uri);
 		}
 		
 		@Override
 		public void onPostExecute(Boolean res)
 		{
-			Log.d(logtag, "Dismissing progress dialog");
+			cursor.requery();
 			dlg.dismiss();
-			if(res)
-			{
-				meal.can_book = true;
-				meal.can_change = false;
-				meal.can_cancel = false;
-				meal.booked = 0;
-			}
 		}
 	}
 
@@ -262,7 +254,7 @@ public class ViewMeals extends Activity {
     	mealsListView.setAddStatesFromChildren(true);
     	mealsListView.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
     	
-		Cursor cursor = getContentResolver().query(MealsMetadata.CONTENT_URI,
+		cursor = getContentResolver().query(MealsMetadata.CONTENT_URI,
 				null, null, null, null);
 		
 		startManagingCursor(cursor);
@@ -301,7 +293,7 @@ public class ViewMeals extends Activity {
 						if(can_book && spaces != 0)
 							bookItem(mealUri);
 						else if (can_cancel)
-							cancelItem(cursor.getPosition());
+							cancelItem(mealUri);
 						else if(spaces == 0)
 							Toast.makeText(ViewMeals.this, R.string.bookFull, Toast.LENGTH_SHORT).show();
 						else if (!can_book)
@@ -444,7 +436,7 @@ public class ViewMeals extends Activity {
     		break;
     		}
     	case MENU_CANCEL: {
-    		cancelItem(item.getItemId());
+    		cancelItem(mealUri);
     		break;
     	}
     	case MENU_CHANGE: {
@@ -474,18 +466,10 @@ public class ViewMeals extends Activity {
 		startActivityForResult(intent, MENU_BOOK);		
     }
     // Starts the CancelMealTask background task given an index in the meals list
-    private void cancelItem(int pos)
+    private void cancelItem(Uri mealUri)
     {
-    	Meal meal = meals.get(pos);
-    	if(meal.can_cancel)
-    	{
-    		CancelMealTask task = new CancelMealTask();
-    		task.execute(meal);
-    	}
-    	else
-    	{
-    		Log.e(logtag, "This meal cannot be cancelled");
-    	}
+		CancelMealTask task = new CancelMealTask();
+		task.execute(mealUri);
     }
     
     private class GetDetailsTask extends AsyncTask<Uri, Void, String>
