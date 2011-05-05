@@ -119,7 +119,7 @@ public class ViewMeals extends Activity {
 			
 			final CheckBox box = new CheckBox(ViewMeals.this);
 			box.setText(R.string.legendDontShow);
-			box.setChecked(true);
+			box.setChecked(false);
 			
 			layout.addView(box, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 			layout.setBackgroundColor(Color.WHITE);
