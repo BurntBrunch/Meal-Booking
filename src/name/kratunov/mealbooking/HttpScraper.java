@@ -207,7 +207,7 @@ public class HttpScraper {
 		return loggedIn;
 	}
 	
-	public List<Meal> getMeals(boolean details) {
+	public List<Meal> getMeals() {
 		if (!isLoggedIn()) {
 			Log.e(logtag, "Must be logged in to get meal list");
 			return null;
@@ -300,9 +300,6 @@ public class HttpScraper {
 			title = title.replace(" )", ")").replace((char)0xA0, ' ').replace("  ", " ").trim();
 			meal.sitting = title;
 			
-			if(details)
-				meal = getDetails(meal);
-			
 			// Check the forms to get the capabilities
 			if(row.select("form[action="+changeUrl+"] > input[type=submit]").size() > 0)
 				meal.can_change = true;
@@ -341,25 +338,15 @@ public class HttpScraper {
 		resolver.insert(MealsMetadata.CONTENT_URI, vals);
 		resolver.notifyChange(MealsMetadata.CONTENT_URI, null);
 	}
-	private Meal getDetails(Meal meal)
-	{
-		if (meal.id == 0) {
-			Log.e(logtag,"We need the id to fill in the details");
-			return meal;
-		}
-		meal = getMenu(meal);
-		meal = getInfo(meal);
-		
-		return meal;
-	}
-	public Meal getMenu(Meal meal)
+
+	public String[] getMenu(final int id)
 	{
 		HttpPost request = new HttpPost(baseUrl+menuUrl);
 		addCommonHeaders(request);
 		request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
-		params.add(new BasicNameValuePair("sitUniq", ""+meal.id));
+		params.add(new BasicNameValuePair("sitUniq", Integer.toString(id)));
 		params.add(new BasicNameValuePair("btnMenu", "Menu"));
 
 		String menuData = URLEncodedUtils.format(params, "UTF-8");
@@ -378,35 +365,40 @@ public class HttpScraper {
 		Elements rows = doc.select("td[align=center]");
 		if(rows.size() == 0)
 		{
-			Log.d(logtag, "Could not get menu for meal " + meal.id);
+			Log.d(logtag, "Could not get menu for meal " + Integer.toString(id));
 			Log.v(logtag, content);
-			return meal;
+			return null;
 		}
 		else
-			Log.d(logtag, "Got menu for meal " + meal.id + ": ~" + rows.size() +
+			Log.d(logtag, "Got menu for meal " + Integer.toString(id) + ": ~" + rows.size() +
 					" items");
 		
-		if(meal.menu == null)
-			meal.menu = new ArrayList<String>();
+		String[] menu = new String[rows.size()];
+		int i =0;
 		
 		for(Element elem: rows)
 		{
 			if(!elem.hasText())
 				continue;
 			
-			meal.menu.add(elem.text().replace((char)0xA0, ' ').trim());
+			menu[i++] = elem.text().replace((char)0xA0, ' ').trim();
 		}
 		
-		return meal;
+		return menu;
 	}
-	public Meal getInfo(Meal meal)
+	
+	public String[] getMenu(final Uri uri) {
+		return getMenu(Integer.parseInt(uri.getLastPathSegment()));
+	}
+	
+	public String getInfo(final int id)
 	{
 		HttpPost request = new HttpPost(baseUrl+infoUrl);
 		addCommonHeaders(request);
 		request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
-		params.add(new BasicNameValuePair("sitUniq", ""+meal.id));
+		params.add(new BasicNameValuePair("sitUniq", Integer.toString(id)));
 		params.add(new BasicNameValuePair("btnInfo", "Info"));
 
 		String infoData = URLEncodedUtils.format(params, "UTF-8");
@@ -426,16 +418,19 @@ public class HttpScraper {
 		String info = text.first().text().replace((char) 0xA0, ' ').trim();
 		if(info.length() == 0)
 		{
-			Log.d(logtag, "Could not get info for meal " + meal.id);
+			Log.d(logtag, "Could not get info for meal " + Integer.toString(id));
 			Log.v(logtag, content);
-			return meal;
+			return null;
 		}
 		else
-			Log.d(logtag, "Got info for meal " + meal.id);
-		meal.info = info;
+			Log.d(logtag, "Got info for meal " + Integer.toString(id));
 		
-		return meal;
+		return info;
 	}
+	public String getInfo(final Uri uri) {
+		return getInfo(Integer.parseInt(uri.getLastPathSegment()));
+	}
+	
 	protected BookingInfo getBookingInfo(final int id, boolean useChangeUrl)
 	{
 		HttpPost request;

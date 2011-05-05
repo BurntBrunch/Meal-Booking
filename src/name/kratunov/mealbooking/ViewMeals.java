@@ -10,12 +10,15 @@ import name.kratunov.mealbooking.R.drawable;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,12 +29,12 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -124,7 +127,7 @@ public class ViewMeals extends Activity {
 		@Override
 		public void onPreExecute()
 		{
-			Log.d(logtag, "Showing progress dialog");
+			/*Log.d(logtag, "Showing progress dialog");
 			dlg = ProgressDialog.show(ViewMeals.this, "", "Updating meals", true, true);
 			dlg.setOnCancelListener(new OnCancelListener() {
 				
@@ -134,15 +137,14 @@ public class ViewMeals extends Activity {
 					GetMealsTask.this.cancel(true);
 					ViewMeals.this.finish();
 				}
-			});
-			dlg.show();
+			});*/
 		}
 		
 		@Override
 		public Void doInBackground(Void... data)
 		{
 	        HttpScraper scraper = HttpScraper.getInstance();
-			meals = scraper.getMeals(false);
+			meals = scraper.getMeals();
 			
 			return null;
 		}
@@ -150,8 +152,8 @@ public class ViewMeals extends Activity {
 		@Override
 		public void onPostExecute(Void res)
 		{
-			Log.d(logtag, "Dismissing progress dialog");
-			dlg.dismiss();
+			//Log.d(logtag, "Dismissing progress dialog");
+			//dlg.dismiss();
 		}
 	}
 	
@@ -257,6 +259,7 @@ public class ViewMeals extends Activity {
     	
     	registerForContextMenu(mealsListView);
     	mealsListView.setItemsCanFocus(true);
+    	mealsListView.setAddStatesFromChildren(true);
     	mealsListView.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
     	
 		Cursor cursor = getContentResolver().query(MealsMetadata.CONTENT_URI,
@@ -284,15 +287,14 @@ public class ViewMeals extends Activity {
 				final boolean can_cancel = cursor.getInt(cursor
 						.getColumnIndex(MealsMetadata.CAN_CANCEL)) == 1;
 				final int spaces = cursor.getInt(cursor.getColumnIndex(MealsMetadata.SPACES));
+
+				final Uri mealUri = Uri.withAppendedPath(
+						MealsMetadata.CONTENT_URI, Integer.toString(id));
 				
 				OnClickListener bookCancelListener = new OnClickListener() {
 					@Override
 					public void onClick(View v)
 					{
-						Uri mealUri = Uri.withAppendedPath(
-								MealsMetadata.CONTENT_URI,
-								Integer.toString(id));
-						
 						if(can_book && spaces != 0)
 							bookItem(mealUri);
 						else if (can_cancel)
@@ -316,7 +318,7 @@ public class ViewMeals extends Activity {
 							@Override
 							public void onClick(View v)
 							{
-								showMenuDialog(cursor.getPosition());
+								showMenuDialog(mealUri);
 							}
 						});
 					}
@@ -337,6 +339,7 @@ public class ViewMeals extends Activity {
 							imgView.setImageResource(drawable.book_forbidden);
 						
 						imgView.setOnClickListener(bookCancelListener);
+						
 					}
 					
 					return true;
@@ -367,53 +370,7 @@ public class ViewMeals extends Activity {
     	Button legend = (Button) findViewById(R.id.LegendButton);
     	legend.setOnClickListener(new LegendClickListener());
     	mealsListView.setAdapter(adapter);
-    	
-    	mealsListView.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position,
-					long id)
-			{
-				Log.i(logtag, "Clicked on view of type: " + view.getClass().getCanonicalName());
-			}
-		});   	
     }
-    
-    // Hacky way of getting click events from the actual views in the items
-    /*private class ItemButtonsClickListener implements OnClickListener
-    {
-
-		@Override
-		public void onClick(View v) {
-			int pos = mealsListView.getPositionForView(v);
-			Log.d(logtag, "Inferred position " + pos);
-			switch(v.getId())
-			{
-			case R.id.title:
-			case R.id.bookImage:
-				Log.d(logtag, "Got click event from book image " + v.getId());
-				Meal meal = meals.get(pos);
-				if(meal.can_book && meal.spaces != 0)
-					bookItem(pos);
-				else if (meal.can_cancel)
-					cancelItem(pos);
-				else if(meal.spaces == 0)
-					Toast.makeText(ViewMeals.this, R.string.bookFull, Toast.LENGTH_SHORT).show();
-				else if (!meal.can_book)
-					Toast.makeText(ViewMeals.this, R.string.bookCannot, Toast.LENGTH_SHORT).show();
-				break;
-			case R.id.menuImage:
-				showMenuDialog(pos);
-				break; 
-			case R.id.guestsImage:
-				Toast.makeText(ViewMeals.this, R.string.guestsNotImplemented, Toast.LENGTH_LONG).show();
-				break;
-			case R.id.LinearLayout01:
-				Log.d(logtag, "Got click event from layout " + v.getId());
-				break;
-			}
-		}
-    	
-    }*/
     
     // Process the result of the BookMeal activity
     @Override
@@ -484,11 +441,11 @@ public class ViewMeals extends Activity {
     	switch(item.getGroupId())
     	{
     	case MENU_MENU: {
-    		showMenuDialog(item.getItemId());
+    		showMenuDialog(mealUri);
     		break;
     		}
     	case MENU_INFO: {
-    		showInfoDialog(item.getItemId());
+    		showInfoDialog(mealUri);
     		break;
     		}
     	case MENU_BOOK: {
@@ -541,10 +498,15 @@ public class ViewMeals extends Activity {
     	}
     }
     
-    private class GetDetailsTask extends AsyncTask<Integer, Void, String>
+    private class GetDetailsTask extends AsyncTask<Uri, Void, String>
     {
-    	private int id, type;
+    	private int type;
     	private ProgressDialog dlg;
+    	
+    	public GetDetailsTask(int tasktype)
+    	{
+    		type = tasktype;
+    	}
     	
     	@Override
     	public void onPreExecute()
@@ -565,21 +527,28 @@ public class ViewMeals extends Activity {
     	}
 
 		@Override
-		protected String doInBackground(Integer... params) {
+		protected String doInBackground(Uri... params) {
 			assert params.length > 0;
-			type = params[0];
-			id = params[1];
-			Meal meal = meals.get(id);
+			Uri uri = params[0];
 			
 			HttpScraper scraper = HttpScraper.getInstance();
 			switch(type)
 			{
 			case MENU_MENU:
-	    		meal = scraper.getMenu(meal); 
-	    		return meal.getMenuString(false); 
+	    		String[] menu = scraper.getMenu(uri); 
+	    		if(menu != null)
+	    		{
+		    		StringBuilder strBld = new StringBuilder();
+		    		for(String menuItem: menu)
+	    			{
+		    			strBld.append(menuItem);
+		    			strBld.append("\n");
+	    			}
+		    		return strBld.toString().trim();
+	    		}else
+	    			return null;
 			case MENU_INFO:
-				meal = scraper.getInfo(meal);
-				return meal.info;
+				return scraper.getInfo(uri);
 			default:
 				Log.e(logtag, "Unknown type in GetDetailsTask");
 			}
@@ -607,16 +576,16 @@ public class ViewMeals extends Activity {
     }
     
     // Shows the menu for the meal at index `id` in the meals list
-    private void showMenuDialog(int id)
+    private void showMenuDialog(Uri mealUri)
     {
-    	GetDetailsTask task = new GetDetailsTask();
-    	task.execute(MENU_MENU, id);
+    	GetDetailsTask task = new GetDetailsTask(MENU_MENU);
+    	task.execute(mealUri);
     }
     // Shows the info for the meal at index `id` in the meals list
-    private void showInfoDialog(int id)
+    private void showInfoDialog(Uri mealUri)
     {
-    	GetDetailsTask task = new GetDetailsTask();
-    	task.execute(MENU_INFO, id);
+    	GetDetailsTask task = new GetDetailsTask(MENU_INFO);
+    	task.execute(mealUri);
     }
     
 }

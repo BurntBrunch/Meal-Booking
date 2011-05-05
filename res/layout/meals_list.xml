@@ -5,7 +5,7 @@
 	xmlns:android="http://schemas.android.com/apk/res/android">
 	<ListView android:layout_width="fill_parent" android:id="@+id/MealsListView"
 		android:layout_centerHorizontal="true" android:layout_height="wrap_content"
-		android:smoothScrollbar="true" android:layout_alignParentTop="true" android:layout_above="@+id/LegendButton" android:addStatesFromChildren="true"></ListView>
+		android:smoothScrollbar="true" android:layout_alignParentTop="true" android:layout_above="@+id/LegendButton"></ListView>
 	<Button android:layout_height="wrap_content"
 		android:layout_width="fill_parent" android:text="Legend" android:id="@+id/LegendButton"
 		android:layout_alignParentBottom="true" android:layout_marginTop="5dp"></Button>
