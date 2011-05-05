@@ -28,4 +28,6 @@
 <string name="bookCancel">Cancelling meal</string>
 <string name="guestsNotImplemented">Booking guests is not possible at this time.</string>
 <string name="requestFail">Request failed</string>
+<string name="legendDontShow">Don\'t show button again</string>
+<string name="legendClose">Close</string>
 </resources>

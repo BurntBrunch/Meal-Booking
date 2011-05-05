@@ -11,15 +11,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.StateListDrawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -30,14 +29,15 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.SimpleCursorAdapter.ViewBinder;
@@ -61,8 +61,42 @@ public class ViewMeals extends Activity {
 	
 	private class LegendClickListener implements OnClickListener
 	{	
+		private class LegendImageFormatter implements ImageGetter{
+
+			@Override
+			public Drawable getDrawable(String source) {
+				Drawable ret;
+				Resources res = getResources(); 
+				if (source.equals("book_allowed"))
+					ret = res.getDrawable(R.drawable.book_allowed);
+				else if(source.equals("book_full"))
+					ret = res.getDrawable(R.drawable.book_full);
+				else if(source.equals("book_forbidden"))
+					ret = res.getDrawable(R.drawable.book_forbidden);
+				else if(source.equals("book_cancel"))
+					ret = res.getDrawable(R.drawable.book_cancel);
+				else if(source.equals("menu"))
+					ret = res.getDrawable(R.drawable.menu);
+				else if(source.equals("guests_none"))
+					ret = res.getDrawable(R.drawable.guests_none);
+				else if(source.equals("guests_added"))
+					ret = res.getDrawable(R.drawable.guests_added);
+				else if(source.equals("guests_forbidden"))
+					ret = res.getDrawable(R.drawable.guests_forbidden);
+				else
+					ret = null;
+				
+				if(ret!=null)
+				{
+					ret.setBounds(0, 0, 20, 20);
+				}
+				return ret;
+			}
+		}
+		
 		@Override
-		public void onClick(View v) {
+		public void onClick(View v) 	
+		{
 			AlertDialog.Builder builder = new AlertDialog.Builder(ViewMeals.this);
 			Spanned msg = Html.fromHtml("<img src=\"menu\"> View menu <br>" +
 					"<img src=\"book_allowed\"> Booking is allowed <br>" +
@@ -75,13 +109,39 @@ public class ViewMeals extends Activity {
 					"<i> Long click an item for more options </i> ",
 					new LegendImageFormatter(), null);
 			
+			LinearLayout layout = new LinearLayout(ViewMeals.this);
+			layout.setOrientation(LinearLayout.VERTICAL);
 			
-			builder.setMessage(msg).setOnCancelListener(new DialogInterface.OnCancelListener(){
+			TextView text = new TextView(ViewMeals.this);
+			text.setText(msg);
+			
+			layout.addView(text, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+			
+			final CheckBox box = new CheckBox(ViewMeals.this);
+			box.setText(R.string.legendDontShow);
+			box.setChecked(true);
+			
+			layout.addView(box, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+			layout.setBackgroundColor(Color.WHITE);
+			
+			builder.setView(layout).setOnCancelListener(new DialogInterface.OnCancelListener(){
 				@Override
 				public void onCancel(DialogInterface dialog) {
 					dialog.dismiss();
+					Editor editor = getSharedPreferences("gui", 0).edit();
+					editor.putBoolean("legendShow", !box.isChecked());
+					editor.commit();
+					
+					syncLegendButton();
 				}
-			}).setCancelable(true);
+			}).setCancelable(true).setNegativeButton(R.string.legendClose, 
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which)
+						{
+							dialog.cancel();
+						}
+					});
 			AlertDialog dlg = builder.create();
 			dlg.setCanceledOnTouchOutside(true);
 			
@@ -89,57 +149,12 @@ public class ViewMeals extends Activity {
 		}
 	}
 	
-	private class LegendImageFormatter implements ImageGetter{
-
-		@Override
-		public Drawable getDrawable(String source) {
-			Drawable ret;
-			Resources res = getResources(); 
-			if (source.equals("book_allowed"))
-				ret = res.getDrawable(R.drawable.book_allowed);
-			else if(source.equals("book_full"))
-				ret = res.getDrawable(R.drawable.book_full);
-			else if(source.equals("book_forbidden"))
-				ret = res.getDrawable(R.drawable.book_forbidden);
-			else if(source.equals("book_cancel"))
-				ret = res.getDrawable(R.drawable.book_cancel);
-			else if(source.equals("menu"))
-				ret = res.getDrawable(R.drawable.menu);
-			else if(source.equals("guests_none"))
-				ret = res.getDrawable(R.drawable.guests_none);
-			else if(source.equals("guests_added"))
-				ret = res.getDrawable(R.drawable.guests_added);
-			else if(source.equals("guests_forbidden"))
-				ret = res.getDrawable(R.drawable.guests_forbidden);
-			else
-				ret = null;
-			
-			if(ret!=null)
-			{
-				ret.setBounds(0, 0, 20, 20);
-			}
-			return ret;
-		}
-	}
-	
 	// Background task to acquire the list of meals
 	private class GetMealsTask extends AsyncTask<Void,Void,Void>
 	{
-		private ProgressDialog dlg;
 		@Override
 		public void onPreExecute()
 		{
-			/*Log.d(logtag, "Showing progress dialog");
-			dlg = ProgressDialog.show(ViewMeals.this, "", "Updating meals", true, true);
-			dlg.setOnCancelListener(new OnCancelListener() {
-				
-				@Override
-				public void onCancel(DialogInterface dialog) {
-					Log.d(logtag, "Cancelling dialog");
-					GetMealsTask.this.cancel(true);
-					ViewMeals.this.finish();
-				}
-			});*/
 		}
 		
 		@Override
@@ -154,8 +169,7 @@ public class ViewMeals extends Activity {
 		@Override
 		public void onPostExecute(Void res)
 		{
-			//Log.d(logtag, "Dismissing progress dialog");
-			//dlg.dismiss();
+			cursor.requery();
 		}
 	}
 	
@@ -196,41 +210,6 @@ public class ViewMeals extends Activity {
 		}
 	}
 
-	// Rebuilds the items list from the meals list
-	private void refreshList()
-	{
-		meals_list.clear();
-		for(Meal meal: meals)
-			addToListItems(meal);
-		if(adapter != null)
-			adapter.notifyDataSetChanged();
-	}
-	// Adds a single meal to the items list
-	private void addToListItems(final Meal meal)
-	{
-		HashMap<String, Object> map = new HashMap<String,Object>();
-		
-		if(meal.spaces == 0)
-			map.put(ListItemId.ItemStatus.toString(), drawable.book_full);
-		else if(meal.can_cancel)
-			map.put(ListItemId.ItemStatus.toString(), drawable.book_cancel);
-		else if(meal.can_book)
-			map.put(ListItemId.ItemStatus.toString(), drawable.book_allowed);
-		else
-			map.put(ListItemId.ItemStatus.toString(), drawable.book_forbidden);
-		
-		map.put(ListItemId.ItemText.toString(), meal.date + " " + meal.time + " " + meal.sitting);
-		map.put(ListItemId.ItemMenu.toString(), new Integer(drawable.menu));
-		
-		/* TODO: Implement guest booking and show the proper icon */
-		if(meal.guests > 0 && false)
-			map.put(ListItemId.ItemGuest.toString(), new Integer(drawable.guests_added));
-		else
-			map.put(ListItemId.ItemGuest.toString(), new Integer(drawable.guests_forbidden));
-		
-		meals_list.add(map);
-	}
-	
     @Override        
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -366,6 +345,18 @@ public class ViewMeals extends Activity {
     	Button legend = (Button) findViewById(R.id.LegendButton);
     	legend.setOnClickListener(new LegendClickListener());
     	mealsListView.setAdapter(adapter);
+    	
+    	syncLegendButton();
+    }
+    
+    public void syncLegendButton()
+    {
+    	boolean legendShow = getSharedPreferences("gui", 0).getBoolean("legendShow", true);
+    	
+    	if(!legendShow)
+    		findViewById(R.id.LegendButton).setVisibility(View.GONE);
+    	else
+    		findViewById(R.id.LegendButton).setVisibility(View.VISIBLE);
     }
     
     // Process the result of the BookMeal activity
