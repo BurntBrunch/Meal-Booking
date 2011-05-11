@@ -313,12 +313,12 @@ public class ViewMeals extends Activity {
 					else if (colName.equals(MealsMetadata.CAN_BOOK))
 					{
 						imgView.setImageResource(R.drawable.guests_forbidden);
-						if(spaces == 0)
-							imgView.setImageResource(drawable.book_full);
+						if (can_book)
+							imgView.setImageResource(drawable.book_allowed);
 						else if(can_cancel)
 							imgView.setImageResource(drawable.book_cancel);
-						else if(can_book)
-							imgView.setImageResource(drawable.book_allowed);
+						else if (spaces == 0)
+							imgView.setImageResource(drawable.book_full);
 						else
 							imgView.setImageResource(drawable.book_forbidden);
 						
