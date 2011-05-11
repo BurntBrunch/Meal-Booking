@@ -542,6 +542,7 @@ public class HttpScraper {
 
 		request.setEntity(bookEntity);
 		
+		@SuppressWarnings("unused")
 		String response = executeRequest(request, false);
 		
 		// TODO: Handle fail conditions
@@ -584,6 +585,7 @@ public class HttpScraper {
 
 		request.setEntity(cancelEntity);
 		
+		@SuppressWarnings("unused")
 		String response = executeRequest(request, false);
 		
 		// TODO: Handle fail conditions

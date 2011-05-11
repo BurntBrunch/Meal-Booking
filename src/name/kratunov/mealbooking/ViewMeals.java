@@ -1,9 +1,5 @@
 package name.kratunov.mealbooking;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
 import name.kratunov.mealbooking.R.drawable;
 import android.app.Activity;
@@ -50,11 +46,6 @@ public class ViewMeals extends Activity {
 	final public int MENU_MENU = 0, MENU_INFO = 1, MENU_BOOK = 2, MENU_CANCEL = 3,
 		MENU_CHANGE = 4, MENU_ITEMS = 5;
 	
-	private enum ListItemId {ItemStatus, ItemText, ItemMenu, ItemGuest};
-	
-	private List<Meal> meals;
-	private List<Map<String, Object>> meals_list = 
-		new ArrayList<Map<String, Object>>();
 	private SimpleCursorAdapter adapter;
 	
 	private ListView mealsListView;
@@ -162,7 +153,7 @@ public class ViewMeals extends Activity {
 		public Void doInBackground(Void... data)
 		{
 	        HttpScraper scraper = HttpScraper.getInstance();
-			meals = scraper.getMeals();
+			scraper.getMeals();
 			
 			return null;
 		}
