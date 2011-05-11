@@ -1,7 +1,6 @@
 package name.kratunov.mealbooking;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +22,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.TextUtils;
 import android.text.Html.ImageGetter;
 import android.text.Spanned;
 import android.util.Log;
@@ -31,6 +31,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -248,7 +249,7 @@ public class ViewMeals extends Activity {
 			@Override
 			public boolean setViewValue(final View view, final Cursor cursor,
 					final int columnIndex)
-			{
+			{	
 				final String colName = cursor.getColumnName(columnIndex);
 				final String date = cursor.getString(cursor.getColumnIndex(MealsMetadata.DATE));
 				final String time = cursor.getString(cursor.getColumnIndex(MealsMetadata.TIME));
@@ -264,6 +265,14 @@ public class ViewMeals extends Activity {
 
 				final Uri mealUri = Uri.withAppendedPath(
 						MealsMetadata.CONTENT_URI, Integer.toString(id));
+				
+				OnLongClickListener longClickListener = new OnLongClickListener() {
+					@Override
+					public boolean onLongClick(View v)
+					{
+						return false;
+					}
+				};
 				
 				OnClickListener bookCancelListener = new OnClickListener() {
 					@Override
@@ -317,6 +326,7 @@ public class ViewMeals extends Activity {
 						
 					}
 					
+					imgView.setOnLongClickListener(longClickListener);
 					return true;
 				}
 				
@@ -332,6 +342,7 @@ public class ViewMeals extends Activity {
 					((TextView) view).setText(strBld.toString());
 					
 					view.setOnClickListener(bookCancelListener);
+					view.setOnLongClickListener(longClickListener);
 					
 					return true;
 				}
@@ -386,21 +397,40 @@ public class ViewMeals extends Activity {
     	super.onCreateContextMenu(menu, v, menuInfo);
     	
     	AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
-    	Meal meal = meals.get(info.position);
+    	Log.i(logtag, "view=" + v.getClass().getCanonicalName() + "; " + info.id + ", " + info.position);
     	
+    	final Uri mealUri = Uri.withAppendedPath(
+				MealsMetadata.CONTENT_URI, Long.toString(info.id));
+    	
+    	final Cursor cur = getContentResolver().query(mealUri, null, null, null, null);
+    	cur.moveToFirst();
+    	 
+		final int id = cur.getInt(cur.getColumnIndex(MealsMetadata._ID));
+		
+		final boolean can_book = cur.getInt(cur
+				.getColumnIndex(MealsMetadata.CAN_BOOK)) == 1;
+		final boolean can_change = cur.getInt(cur
+				.getColumnIndex(MealsMetadata.CAN_CHANGE)) == 1;
+		final boolean can_cancel = cur.getInt(cur
+				.getColumnIndex(MealsMetadata.CAN_CANCEL)) == 1;
+		final String meal_menu = cur.getString(cur
+				.getColumnIndex(MealsMetadata.MENU));
+		final String meal_info = cur.getString(cur
+				.getColumnIndex(MealsMetadata.EXTRA_INFO));
+		
     	menu.add(MENU_MENU, info.position, 0, R.string.viewMenu);
    		menu.add(MENU_INFO, info.position, 0, R.string.viewInfo);
    		
-   		if(!meal.has_menu)
+   		if(TextUtils.isEmpty(meal_menu))
    			menu.setGroupEnabled(MENU_MENU, false);
-   		if(!meal.has_info)
+   		if(TextUtils.isEmpty(meal_info))
    			menu.setGroupEnabled(MENU_INFO, false);
-    	if(meal.can_book)
-    		menu.add(MENU_BOOK, meal.id, 0, R.string.book);
-    	if(meal.can_change)
-    		menu.add(MENU_CHANGE, meal.id, 0, R.string.changeBooking);
-    	if(meal.can_cancel)
-    		menu.add(MENU_CANCEL, meal.id, 0, R.string.cancel);
+    	if(can_book)
+    		menu.add(MENU_BOOK, id, 0, R.string.book);
+    	if(can_change)
+    		menu.add(MENU_CHANGE, id, 0, R.string.changeBooking);
+    	if(can_cancel)
+    		menu.add(MENU_CANCEL, id, 0, R.string.cancel);
     }
     
     @Override

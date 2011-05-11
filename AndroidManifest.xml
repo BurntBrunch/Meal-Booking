@@ -16,6 +16,7 @@
     <intent-filter>
         <category android:name="android.intent.category.DEFAULT"></category>
         <action android:name="name.kratunov.mealbooking.BOOK_MEAL"></action>
+        <action android:name="name.kratunov.mealbooking.CHANGE_MEAL"></action>
         <data android:mimeType="vnd.android.cursor.item/vnd.mealbooking.meal"></data>
     </intent-filter>
 </activity>
