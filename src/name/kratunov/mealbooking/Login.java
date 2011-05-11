@@ -1,6 +1,5 @@
 package name.kratunov.mealbooking;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,7 +14,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class Login extends Activity {
+public class Login extends BaseActivity {
 
 	private EditText cardnumber, password;
 	private CheckBox automaticLogin ;

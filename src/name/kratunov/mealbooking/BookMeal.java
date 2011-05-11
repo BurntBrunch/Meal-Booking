@@ -1,6 +1,5 @@
 package name.kratunov.mealbooking;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -16,7 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-public class BookMeal extends Activity {
+public class BookMeal extends BaseActivity {
 	final private String logtag = "MealBooking";
 	final public static int BOOK_SUCCESS = 5;
 	final public static int BOOK_FAILURE = 6;

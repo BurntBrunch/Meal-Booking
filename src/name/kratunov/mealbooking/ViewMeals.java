@@ -2,7 +2,6 @@ package name.kratunov.mealbooking;
 
 import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
 import name.kratunov.mealbooking.R.drawable;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
@@ -41,7 +40,7 @@ import android.widget.SimpleCursorAdapter.ViewBinder;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ViewMeals extends Activity {
+public class ViewMeals extends BaseActivity {
 	final private String logtag = "MealBooking";
 	final public int MENU_MENU = 0, MENU_INFO = 1, MENU_BOOK = 2, MENU_CANCEL = 3,
 		MENU_CHANGE = 4, MENU_ITEMS = 5;
