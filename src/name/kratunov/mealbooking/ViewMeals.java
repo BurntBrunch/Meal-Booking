@@ -22,9 +22,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.TextUtils;
 import android.text.Html.ImageGetter;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -46,7 +46,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class ViewMeals extends Activity {
-	final private String logtag = "ViewMeals";
+	final private String logtag = "MealBooking";
 	final public int MENU_MENU = 0, MENU_INFO = 1, MENU_BOOK = 2, MENU_CANCEL = 3,
 		MENU_CHANGE = 4, MENU_ITEMS = 5;
 	
@@ -404,7 +404,7 @@ public class ViewMeals extends Activity {
     	
     	final Cursor cur = getContentResolver().query(mealUri, null, null, null, null);
     	cur.moveToFirst();
-    	 
+
 		final int id = cur.getInt(cur.getColumnIndex(MealsMetadata._ID));
 		
 		final boolean can_book = cur.getInt(cur

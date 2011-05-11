@@ -1,10 +1,7 @@
 package name.kratunov.mealbooking;
 
-import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
@@ -20,7 +17,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 public class BookMeal extends Activity {
-	final private String logtag = "BookMeal";
+	final private String logtag = "MealBooking";
 	final public static int BOOK_SUCCESS = 5;
 	final public static int BOOK_FAILURE = 6;
 	final public static int BOOK_CANCEL = 7;
@@ -159,7 +156,8 @@ public class BookMeal extends Activity {
 		
 		if(change)
 		{
-			Log.i(logtag, "Changing meal; choices are " + info.meal_choice + ", " + info.diet_choice);
+			Log.i(logtag, "Changing meal; choices are " + info.meal_choice
+					+ ", " + info.diet_choice);
 			mealsSpinner.setSelection(meals_adapter.getPosition(info.meal_choice));
 			dietsSpinner.setSelection(diets_adapter.getPosition(info.diet_choice));
 

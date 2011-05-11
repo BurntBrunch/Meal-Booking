@@ -48,7 +48,7 @@ public class HttpScraper {
 	final private String menuUrl = "sittingmenu.php";
 	final private String infoUrl = "sittinginfo.php";
 	
-	final private String logtag = "HTTPScraper";
+	final private String logtag = "MealBooking";
 
 	final private String userAgent = "MealBooking Android/0.01a";
 

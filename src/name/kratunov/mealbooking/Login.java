@@ -43,7 +43,7 @@ public class Login extends Activity {
 		}
 	}
 
-	final private String logtag = "Login";
+	final private String logtag = "MealBooking";
 	private class LoginButtonListener implements OnClickListener{
 		@Override
 		public void onClick(View v) {
