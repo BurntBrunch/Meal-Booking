@@ -463,16 +463,24 @@ public class HttpScraper {
 		Document doc = Jsoup.parse(content);
 		Elements meals_elems = doc.select("select[name=lstMeals] > option");
 		Map<String, String> meals = new LinkedHashMap<String, String>();
+		String meal_choice = null;
 		
 		for(Element elem: meals_elems)
+		{
 			meals.put(elem.text(), elem.attr("value"));
+			if(elem.hasAttr("selected"))
+				meal_choice = elem.text();
+		}
 		
 		Elements diet_elems = doc.select("select[name=lstSpecDiet] > option");
 		Map<String, String> diets = new LinkedHashMap<String, String>();
+		String diet_choice = null;
+		
 		for(Element elem: diet_elems)
 		{
-			Log.v(logtag, "Meal: " + elem.text().trim() + " = " + elem.attr("value"));
 			diets.put(elem.text().trim(), elem.attr("value"));
+			if(elem.hasAttr("selected"))
+				diet_choice = elem.text();
 		}
 		
 		BookingInfo res = new BookingInfo();
@@ -491,6 +499,8 @@ public class HttpScraper {
 			res.secrets = extra;
 		}
 		
+		res.meal_choice = meal_choice;
+		res.diet_choice = diet_choice;
 		res.dietary_requirements = diets;
 		res.meals = meals;
 		res.id = id;

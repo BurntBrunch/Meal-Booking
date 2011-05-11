@@ -120,7 +120,7 @@ public class BookMeal extends Activity {
 		{
 			Log.d(logtag, "Booking meal " + mealUri.getLastPathSegment());
 			change = false;
-		} else if (intent.getAction().equalsIgnoreCase("name.kratunov.mealbooking.BOOK_MEAL"))
+		} else if (intent.getAction().equalsIgnoreCase("name.kratunov.mealbooking.CHANGE_MEAL"))
 		{
 			Log.d(logtag, "Changing meal " + mealUri.getLastPathSegment());
 			change = true;
@@ -156,9 +156,15 @@ public class BookMeal extends Activity {
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		diets_adapter
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
+		
 		if(change)
+		{
+			Log.i(logtag, "Changing meal; choices are " + info.meal_choice + ", " + info.diet_choice);
+			mealsSpinner.setSelection(meals_adapter.getPosition(info.meal_choice));
+			dietsSpinner.setSelection(diets_adapter.getPosition(info.diet_choice));
+
 			button.setText(this.getResources().getString(R.string.changeBooking));
+		}
 		
 		dietsEdit.setText(info.additional_dietary);
 		button.setOnClickListener(new ButtonOnClickListener());
