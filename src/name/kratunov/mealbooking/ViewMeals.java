@@ -15,7 +15,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.text.Html;
 import android.text.Html.ImageGetter;
 import android.text.Spanned;
@@ -140,30 +139,6 @@ public class ViewMeals extends BaseActivity {
 		}
 	}
 	
-	// Background task to acquire the list of meals
-	private class GetMealsTask extends AsyncTask<Void,Void,Void>
-	{
-		@Override
-		public void onPreExecute()
-		{
-		}
-		
-		@Override
-		public Void doInBackground(Void... data)
-		{
-	        HttpScraper scraper = HttpScraper.getInstance();
-			scraper.getMeals();
-			
-			return null;
-		}
-		
-		@Override
-		public void onPostExecute(Void res)
-		{
-			cursor.requery();
-		}
-	}
-	
 	// Background task to cancel a meal
 	private class CancelMealTask extends AsyncTask<Uri,Void,Boolean>
 	{
@@ -190,28 +165,28 @@ public class ViewMeals extends BaseActivity {
 			assert data.length > 0;
 			
 			Uri uri = data[0];
-			return HttpScraper.getInstance().cancelMeal(uri);
+			return mService.CancelMeal(uri);
 		}
 		
 		@Override
 		public void onPostExecute(Boolean res)
 		{
-			cursor.requery();
 			dlg.dismiss();
 		}
 	}
 
-    @Override        
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        HttpScraper scraper = HttpScraper.getInstance();
-        if(!scraper.isLoggedIn()) finish(); // sanity check
-        
-        GetMealsTask task = new GetMealsTask();
-        task.execute();
-        initializeViews();
-    }
     
+
+	@Override
+	protected void onServiceConnected()
+	{
+		if (!mService.IsLoggedIn())
+			finish(); // sanity check
+
+		mService.RefreshMeals(false);
+		initializeViews();
+	}
+
     // Called from GetMealsTask.onPostExecute
     private void initializeViews()
     {
@@ -224,8 +199,7 @@ public class ViewMeals extends BaseActivity {
     	mealsListView.setAddStatesFromChildren(true);
     	mealsListView.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
     	
-		cursor = getContentResolver().query(MealsMetadata.CONTENT_URI,
-				null, null, null, null);
+		cursor = mService.GetMealsCursor();
 		
 		startManagingCursor(cursor);
 		

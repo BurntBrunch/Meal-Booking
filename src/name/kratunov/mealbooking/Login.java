@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,8 +30,7 @@ public class Login extends BaseActivity {
 		@Override
 		public Boolean doInBackground(String... data)
 		{
-			HttpScraper scraper = HttpScraper.getInstance();
-			return scraper.login(data[0], data[1]);
+			return mService.Login(data[0], data[1]);
 		}
 		@Override
 		public void onPostExecute(Boolean data)
@@ -83,8 +81,9 @@ public class Login extends BaseActivity {
 	}
 	
 	@Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	public void onServiceConnected()
+	{
+		super.onServiceConnected();
         
         setContentView(R.layout.login);
         

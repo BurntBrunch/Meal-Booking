@@ -6,7 +6,6 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -43,7 +42,7 @@ public class BookMeal extends BaseActivity {
 
 		@Override
 		public BookingInfo doInBackground(Uri... params) {
-			return HttpScraper.getInstance().getBookingInfo(params[0], change);
+			return mService.GetBookingInfo(params[0], change);
 		}
 
 		@Override
@@ -84,9 +83,8 @@ public class BookMeal extends BaseActivity {
 		
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			HttpScraper scraper = HttpScraper.getInstance();
 			if(info != null)
-				return scraper.bookMeal(info);
+				return mService.BookMeal(info);
 			else
 				return false;
 		}
@@ -107,8 +105,9 @@ public class BookMeal extends BaseActivity {
 		
 	}
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	public void onServiceConnected()
+	{
+		super.onServiceConnected();
 
 		Intent intent = getIntent();
 		mealUri = Uri.parse(intent.toUri(0));

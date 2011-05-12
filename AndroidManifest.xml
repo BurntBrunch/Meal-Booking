@@ -21,6 +21,12 @@
     </intent-filter>
 </activity>
 <provider android:name=".MealsContentProvider" android:authorities="name.kratunov.mealbooking.mealsprovider"></provider>
+<service android:name=".MealService">
+    <intent-filter>
+        <action android:name="name.kratunov.mealbooking.MEAL_SERVICE"></action>
+        <category android:name="android.intent.category.DEFAULT"></category>
+    </intent-filter>
+</service>
 </application>
 
 
