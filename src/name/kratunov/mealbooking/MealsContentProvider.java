@@ -129,6 +129,13 @@ public class MealsContentProvider extends ContentProvider {
 		if (!values.containsKey(MealsMetadata.TITLE))
 			values.put(MealsMetadata.TITLE, "Title-less meal");
 		
+		if (values.containsKey(MealsMetadata.TIME))
+		{
+			String tmp = values.getAsString(MealsMetadata.TIME);
+			tmp = tmp.replace(".", ":");
+			values.put(MealsMetadata.TIME, tmp);
+		}
+
 		if (!values.containsKey(MealsMetadata.DATE))
 			values.put(MealsMetadata.DATE, "Unspecified date");
 		

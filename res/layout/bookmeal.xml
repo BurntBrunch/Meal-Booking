@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="wrap_content" android:layout_height="fill_parent">
+  android:layout_width="wrap_content" android:layout_height="fill_parent" android:padding="5dp">
+    <TextView android:layout_height="wrap_content" android:id="@+id/MealText" android:layout_width="fill_parent" android:gravity="center" android:textSize="18dp" android:text="Sun, 00/00/00 Dinner"></TextView>
+    <LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/MealsLayout" android:layout_marginTop="5dp" android:layout_below="@+id/MealText">
+        <TextView android:textSize="7pt" android:layout_width="wrap_content" android:id="@+id/MealLabel" android:text="@string/mealType" android:layout_height="fill_parent" android:gravity="center" android:minWidth="130dp"></TextView>
+        <Spinner android:layout_width="fill_parent" android:layout_marginBottom="2pt" android:id="@+id/MealSpinner" android:layout_height="wrap_content"></Spinner>
+    </LinearLayout>
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/DietsLayout" android:layout_below="@+id/MealsLayout" android:layout_width="fill_parent">
+        <TextView android:textSize="7pt" android:id="@+id/DietaryLabel" android:text="@string/dietaryLabel" android:layout_width="wrap_content" android:layout_height="fill_parent" android:gravity="center" android:maxWidth="130dp" android:minWidth="130dp"></TextView>
+        <Spinner android:layout_height="wrap_content" android:id="@+id/DietarySpinner" android:layout_width="fill_parent"></Spinner>
+    </LinearLayout>
 
-
-
-
-
-
-<RelativeLayout android:id="@+id/RelativeLayout01" android:layout_width="wrap_content" android:layout_height="wrap_content"></RelativeLayout>
-<TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_below="@+id/RelativeLayout01" android:text="@string/mealType" android:textSize="7pt" android:id="@+id/MealLabel"></TextView>
-<Spinner android:layout_height="wrap_content" android:layout_below="@+id/MealLabel" android:id="@+id/MealSpinner" android:layout_width="fill_parent" android:layout_marginBottom="2pt"></Spinner>
-<TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_below="@+id/MealSpinner" android:id="@+id/DietaryLabel" android:text="@string/dietaryLabel" android:textSize="7pt"></TextView>
-<Spinner android:layout_height="wrap_content" android:layout_below="@+id/DietaryLabel" android:layout_width="fill_parent" android:id="@+id/DietarySpinner"></Spinner>
-
-<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_below="@+id/DietarySpinner" android:layout_centerInParent="false" android:id="@+id/DietaryInfoEditText" android:hint="@string/dietaryInfoLabel"></EditText>
-<EditText android:layout_height="wrap_content" android:layout_below="@+id/DietaryInfoEditText" android:hint="@string/bookingInformation" android:id="@+id/InformationEditText" android:layout_width="fill_parent"></EditText>
-<Button android:layout_height="wrap_content" android:layout_below="@+id/InformationEditText" android:layout_centerHorizontal="true" android:id="@+id/BookButton" android:text="@string/book" android:layout_width="fill_parent"></Button>
+<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_centerInParent="false" android:id="@+id/DietaryInfoEditText" android:hint="@string/dietaryInfoLabel" android:layout_below="@+id/DietsLayout" android:layout_marginTop="5dp"></EditText>
+<EditText android:layout_height="wrap_content" android:layout_below="@+id/DietaryInfoEditText" android:hint="@string/bookingInformation" android:id="@+id/InformationEditText" android:layout_width="fill_parent" android:layout_marginTop="5dp"></EditText>
+<Button android:layout_height="wrap_content" android:layout_below="@+id/InformationEditText" android:layout_centerHorizontal="true" android:id="@+id/BookButton" android:text="@string/book" android:layout_width="fill_parent" android:layout_marginTop="5dp"></Button>
 </RelativeLayout>

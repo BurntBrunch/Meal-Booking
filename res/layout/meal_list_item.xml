@@ -9,10 +9,9 @@
 		android:layout_width="wrap_content" android:scaleType="fitXY"
 		android:layout_gravity="center_vertical" android:maxWidth="40dp"
 		android:id="@+id/bookImage" android:focusable="false"></ImageView>
-	<TextView android:layout_height="wrap_content" android:layout_marginLeft="2pt"
-		android:id="@+id/title" android:textSize="7pt"
-		android:layout_gravity="top"
-		android:maxWidth="190dp" android:text="Sun, 00/00/00 Dinner (FORMAL HALL)" android:clickable="false" android:layout_width="fill_parent" android:layout_weight="1" android:textColorHighlight="#cccccc" android:focusable="false"></TextView>
+	<TextView android:layout_marginLeft="2pt"
+		android:id="@+id/title" android:layout_gravity="top"
+		android:maxWidth="190dp" android:text="Sun, 00/00/00 Dinner (FORMAL HALL)" android:clickable="false" android:layout_width="fill_parent" android:layout_weight="1" android:textColorHighlight="#cccccc" android:focusable="false" android:textSize="15dp" android:layout_height="fill_parent" android:gravity="center_vertical"></TextView>
 	<ImageView android:src="@drawable/menu"
 		android:id="@+id/menuImage" android:layout_width="wrap_content"
 		android:adjustViewBounds="true" android:maxWidth="40dp"

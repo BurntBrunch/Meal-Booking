@@ -1,9 +1,11 @@
 package name.kratunov.mealbooking;
 
+import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -13,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 public class BookMeal extends BaseActivity {
 	final private String logtag = "MealBooking";
@@ -26,6 +29,7 @@ public class BookMeal extends BaseActivity {
 	private Spinner mealsSpinner, dietsSpinner;
 	private EditText dietsEdit, infoEdit;
 	private Button button;
+	private TextView mealText;
 	
 	private boolean change = false;
 
@@ -132,6 +136,17 @@ public class BookMeal extends BaseActivity {
 	private void finalizeInit() {
 		setContentView(R.layout.bookmeal);
 		
+		mealText = (TextView) findViewById(R.id.MealText);
+
+		Cursor cursor = mService.GetMeal(mealUri);
+
+		final String date = cursor.getString(cursor
+				.getColumnIndex(MealsMetadata.DATE));
+		final String time = cursor.getString(cursor
+				.getColumnIndex(MealsMetadata.TIME));
+		final String title = cursor.getString(cursor
+				.getColumnIndex(MealsMetadata.TITLE));
+
 		mealsSpinner = (Spinner) findViewById(R.id.MealSpinner);
 		dietsSpinner = (Spinner) findViewById(R.id.DietarySpinner);
 		dietsEdit = (EditText) findViewById(R.id.DietaryInfoEditText);
@@ -164,6 +179,14 @@ public class BookMeal extends BaseActivity {
 		
 		dietsEdit.setText(info.additional_dietary);
 		button.setOnClickListener(new ButtonOnClickListener());
+
+		StringBuilder strBld = new StringBuilder(date);
+		strBld.append(" ");
+		strBld.append(time);
+		strBld.append("\n");
+		strBld.append(title);
+
+		mealText.setText(strBld);
 	}
 
 	private class ButtonOnClickListener implements OnClickListener {

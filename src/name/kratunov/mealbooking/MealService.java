@@ -105,6 +105,15 @@ public class MealService extends Service {
 		requery();
 	}
 
+	public Cursor GetMeal(Uri mealUri)
+	{
+		Cursor cursor = getContentResolver().query(mealUri, null, null, null,
+				null);
+		cursor.moveToFirst();
+
+		return cursor;
+	}
+
 	public Cursor GetMealsCursor()
 	{
 		return mMealsCursor;
