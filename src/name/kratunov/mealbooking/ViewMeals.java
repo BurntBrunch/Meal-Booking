@@ -1,5 +1,6 @@
 package name.kratunov.mealbooking;
 
+import name.kratunov.mealbooking.HttpScraper.ProgressReporter;
 import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
 import name.kratunov.mealbooking.R.drawable;
 import android.app.AlertDialog;
@@ -15,6 +16,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.text.Html;
 import android.text.Html.ImageGetter;
 import android.text.Spanned;
@@ -28,6 +30,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -176,15 +179,49 @@ public class ViewMeals extends BaseActivity {
 	}
 
     
+	@Override
+	public void onCreate(Bundle sa)
+	{
+		super.onCreate(sa);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		setTitle(R.string.mealsList);
+	}
+
+	final ProgressReporter progressReporter = new ProgressReporter() {
+		@Override
+		public void onProgressStart()
+		{
+			// setProgress(Window.PROGRESS_INDETERMINATE_ON);
+			setProgressBarIndeterminateVisibility(true);
+			setTitle(R.string.mealsRefresh);
+		}
+
+		@Override
+		public void onProgressEnd()
+		{
+			// setProgress(Window.PROGRESS_INDETERMINATE_OFF);
+			setProgressBarIndeterminateVisibility(false);
+			setTitle(R.string.mealsList);
+		}
+
+		@Override
+		public void onProgress(int n, int cnt)
+		{
+
+		}
+	};
 
 	@Override
 	protected void onServiceConnected()
 	{
+		super.onServiceConnected();
+
 		if (!mService.IsLoggedIn())
 			finish(); // sanity check
 
-		mService.RefreshMeals(false);
 		initializeViews();
+
+		mService.RefreshMeals(false, progressReporter);
 	}
 
     // Called from GetMealsTask.onPostExecute

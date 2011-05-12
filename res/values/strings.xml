@@ -30,4 +30,6 @@
 <string name="requestFail">Request failed</string>
 <string name="legendDontShow">Don\'t show button again</string>
 <string name="legendClose">Close</string>
+<string name="mealsRefresh">Refreshing meals</string>
+<string name="mealsList">Meals list</string>
 </resources>

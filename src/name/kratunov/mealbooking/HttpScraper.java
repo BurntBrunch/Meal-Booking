@@ -221,6 +221,13 @@ public class HttpScraper {
 			return false;
 		}
 
+		reporter.onProgressStart();
+
+		ContentResolver resolver = Application.getContext()
+				.getContentResolver();
+		resolver.delete(MealsMetadata.CONTENT_URI, "1=1", null);
+		resolver.notifyChange(MealsMetadata.CONTENT_URI, null);
+
 		HttpGet request = new HttpGet(baseUrl+mealsUrl);
 		addCommonHeaders(request);
 		String html = null;
@@ -256,12 +263,6 @@ public class HttpScraper {
 			Log.d(logtag, "Got " + rows.size() + " rows");
 
 		List<Meal> meals = new ArrayList<Meal>();
-		
-		ContentResolver resolver = Application.getContext().getContentResolver();
-		resolver.delete(MealsMetadata.CONTENT_URI, "1=1", null);
-		resolver.notifyChange(MealsMetadata.CONTENT_URI, null);
-		
-		reporter.onProgressStart();
 
 		for (Element row: rows) {
 			Meal meal = new Meal();

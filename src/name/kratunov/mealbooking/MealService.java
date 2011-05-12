@@ -43,34 +43,58 @@ public class MealService extends Service {
 		mHandler = new Handler();
 	}
 
-	public void RefreshMeals(boolean blocking)
+	public void RefreshMeals(boolean blocking, final ProgressReporter reporter)
 	{
-		final ProgressReporter reporter = new ProgressReporter() {
+		final ProgressReporter inlineReporter = new ProgressReporter() {
 			@Override
 			public void onProgressStart()
 			{
 				requery();
+				if (reporter != null)
+					mHandler.post(new Runnable() {
+						@Override
+						public void run()
+						{
+							reporter.onProgressStart();
+						}
+					});
 			}
 			@Override
 			public void onProgressEnd()
 			{
 				requery();
+				if (reporter != null)
+					mHandler.post(new Runnable() {
+						@Override
+						public void run()
+						{
+							reporter.onProgressEnd();
+						}
+					});
 			}
 			@Override
-			public void onProgress(int n, int cnt)
+			public void onProgress(final int n, final int cnt)
 			{
 				requery();
+				if (reporter != null)
+					mHandler.post(new Runnable() {
+						@Override
+						public void run()
+						{
+							reporter.onProgress(n, cnt);
+						}
+					});
 			}
 		};
 		if (blocking)
-			HttpScraper.getInstance().getMeals(reporter);
+			HttpScraper.getInstance().getMeals(inlineReporter);
 		else
 		{
 			AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
 				@Override
 				public Void doInBackground(Void... data)
 				{
-					HttpScraper.getInstance().getMeals(reporter);
+					HttpScraper.getInstance().getMeals(inlineReporter);
 
 					return null;
 				}
