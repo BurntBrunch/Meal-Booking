@@ -1,5 +1,6 @@
 package name.kratunov.mealbooking;
 
+import name.kratunov.mealbooking.HttpScraper.ProgressReporter;
 import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
 import android.app.Service;
 import android.content.Intent;
@@ -44,15 +45,32 @@ public class MealService extends Service {
 
 	public void RefreshMeals(boolean blocking)
 	{
+		final ProgressReporter reporter = new ProgressReporter() {
+			@Override
+			public void onProgressStart()
+			{
+				requery();
+			}
+			@Override
+			public void onProgressEnd()
+			{
+				requery();
+			}
+			@Override
+			public void onProgress(int n, int cnt)
+			{
+				requery();
+			}
+		};
 		if (blocking)
-			HttpScraper.getInstance().getMeals();
+			HttpScraper.getInstance().getMeals(reporter);
 		else
 		{
 			AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
 				@Override
 				public Void doInBackground(Void... data)
 				{
-					HttpScraper.getInstance().getMeals();
+					HttpScraper.getInstance().getMeals(reporter);
 
 					return null;
 				}

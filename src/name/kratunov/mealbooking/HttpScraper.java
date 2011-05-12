@@ -206,10 +206,19 @@ public class HttpScraper {
 		return loggedIn;
 	}
 	
-	public List<Meal> getMeals() {
+	public interface ProgressReporter {
+		public void onProgressStart();
+
+		public void onProgress(int n, int cnt);
+
+		public void onProgressEnd();
+	}
+
+	public boolean getMeals(ProgressReporter reporter)
+	{
 		if (!isLoggedIn()) {
 			Log.e(logtag, "Must be logged in to get meal list");
-			return null;
+			return false;
 		}
 
 		HttpGet request = new HttpGet(baseUrl+mealsUrl);
@@ -221,22 +230,28 @@ public class HttpScraper {
 		} catch (ClientProtocolException e) {
 			Log.e(logtag, "Could not get a session id", e);
 			e.printStackTrace();
-			return null;
+			reporter.onProgressEnd();
+			return false;
 		} catch (IOException e) {
 			Log.e(logtag, "Could not get a session id", e);
 			e.printStackTrace();
-			return null;
+			reporter.onProgressEnd();
+			return false;
 		}
 
 		if(html == null)
-			return null;
+		{
+			reporter.onProgressEnd();
+			return false;
+		}
 		
 		Document doc = Jsoup.parse(html);
 		Elements rows = doc.select("table > tr.RowAS1");
 
 		if (rows.isEmpty()) {
 			Log.e(logtag, "Could not get the rows in the table");
-			return null;
+			reporter.onProgressEnd();
+			return false;
 		} else
 			Log.d(logtag, "Got " + rows.size() + " rows");
 
@@ -246,6 +261,8 @@ public class HttpScraper {
 		resolver.delete(MealsMetadata.CONTENT_URI, "1=1", null);
 		resolver.notifyChange(MealsMetadata.CONTENT_URI, null);
 		
+		reporter.onProgressStart();
+
 		for (Element row: rows) {
 			Meal meal = new Meal();
 
@@ -291,7 +308,8 @@ public class HttpScraper {
 				default:
 					Log.e(logtag,
 							"Non-empty info cell which we can't deal with!");
-					return meals; // return what we have so far
+						reporter.onProgressEnd();
+						return true; // return what we have so far
 				}
 			}
 
@@ -316,8 +334,10 @@ public class HttpScraper {
 			
 			meals.add(meal);
 			addToContentProvider(meal);
+			reporter.onProgress(rows.indexOf(row), rows.size());
 		}
-		return meals;
+		reporter.onProgressEnd();
+		return true;
 	}
 	private void addToContentProvider(Meal meal)
 	{
