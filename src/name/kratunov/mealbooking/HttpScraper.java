@@ -130,7 +130,7 @@ public class HttpScraper {
 			else
 				res = 0;
 		}
-		//Log.v(logtag, "Parsed " + res + " from '" + num + "'");
+
 		return res;
 	}
 
@@ -184,7 +184,6 @@ public class HttpScraper {
 
 		if (content.toLowerCase().contains("error")) {
 			Log.d(logtag, "Received an error");
-			Log.v(logtag, content);
 			return false;
 		}
 
@@ -234,7 +233,7 @@ public class HttpScraper {
 		
 		Document doc = Jsoup.parse(html);
 		Elements rows = doc.select("table > tr.RowAS1");
-		//Log.v(logtag, html);
+
 		if (rows.isEmpty()) {
 			Log.e(logtag, "Could not get the rows in the table");
 			return null;
@@ -369,7 +368,6 @@ public class HttpScraper {
 		if(rows.size() == 0)
 		{
 			Log.d(logtag, "Could not get menu for meal " + Integer.toString(id));
-			Log.v(logtag, content);
 			return null;
 		}
 		else
@@ -422,7 +420,6 @@ public class HttpScraper {
 		if(info.length() == 0)
 		{
 			Log.d(logtag, "Could not get info for meal " + Integer.toString(id));
-			Log.v(logtag, content);
 			return null;
 		}
 		else
