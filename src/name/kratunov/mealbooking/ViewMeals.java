@@ -200,9 +200,7 @@ public class ViewMeals extends BaseActivity {
     	mealsListView.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
     	
 		cursor = mService.GetMealsCursor();
-		
-		startManagingCursor(cursor);
-		
+
 		adapter = new SimpleCursorAdapter(this, R.layout.meal_list_item,
 				cursor, 
 				new String[] { MealsMetadata.CAN_BOOK, MealsMetadata.TITLE, MealsMetadata.MENU,
