@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<group android:id="@+id/MainMenuGroup" android:menuCategory="container">
+		<item android:icon="@android:drawable/ic_menu_preferences"
+			android:titleCondensed="Settings" android:alphabeticShortcut="S" android:id="@+id/PreferencesMenuItem" android:title="Settings"></item>
+		<item android:id="@+id/LogoutMenuItem" android:title="Logout"
+			android:icon="@drawable/ic_menu_back"></item>
+	</group>
+    
+    <group android:id="@+id/ViewMealsGroup" android:visible="false">
+        <item android:title="Refresh list" android:titleCondensed="Refresh" android:icon="@*android:drawable/ic_menu_refresh" android:id="@+id/RefreshMealsMenuItem"></item>
+    </group>
+</menu>

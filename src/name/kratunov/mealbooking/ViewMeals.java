@@ -24,6 +24,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -121,8 +122,10 @@ public class ViewMeals extends BaseActivity {
 				@Override
 				public void onCancel(DialogInterface dialog) {
 					dialog.dismiss();
-					Editor editor = getSharedPreferences("gui", 0).edit();
-					editor.putBoolean("legendShow", !box.isChecked());
+					Editor editor = getSharedPreferences(PreferencesActivity.PREFERENCES_KEY,
+							0).edit();
+					editor.putBoolean(PreferencesActivity.SHOW_LEGEND_KEY,
+							!box.isChecked());
 					editor.commit();
 					
 					syncLegendButton();
@@ -185,6 +188,13 @@ public class ViewMeals extends BaseActivity {
 		super.onCreate(sa);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setTitle(R.string.mealsList);
+	}
+	
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+		syncLegendButton();
 	}
 
 	final ProgressReporter progressReporter = new ProgressReporter() {
@@ -361,12 +371,18 @@ public class ViewMeals extends BaseActivity {
     
     public void syncLegendButton()
     {
-    	boolean legendShow = getSharedPreferences("gui", 0).getBoolean("legendShow", true);
+		boolean legendShow = getSharedPreferences(
+				PreferencesActivity.PREFERENCES_KEY, 0).getBoolean(
+				PreferencesActivity.SHOW_LEGEND_KEY, true);
     	
-    	if(!legendShow)
-    		findViewById(R.id.LegendButton).setVisibility(View.GONE);
-    	else
-    		findViewById(R.id.LegendButton).setVisibility(View.VISIBLE);
+		View legendBtn = findViewById(R.id.LegendButton);
+		if(legendBtn != null)
+		{
+			if (!legendShow)
+				legendBtn.setVisibility(View.GONE);
+			else
+				legendBtn.setVisibility(View.VISIBLE);
+		}
     }
     
     // Process the result of the BookMeal activity
@@ -468,6 +484,13 @@ public class ViewMeals extends BaseActivity {
     	return true;
     }
     
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		super.onCreateOptionsMenu(menu);
+		return true;
+	}
+
     private void changeItem(Uri mealUri)
     {
 		Intent intent = new Intent("name.kratunov.mealbooking.CHANGE_MEAL");
@@ -594,5 +617,4 @@ public class ViewMeals extends BaseActivity {
     	GetDetailsTask task = new GetDetailsTask(MENU_INFO);
     	task.execute(mealUri);
     }
-    
 }

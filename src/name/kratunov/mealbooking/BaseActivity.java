@@ -9,6 +9,9 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 public class BaseActivity extends Activity {
 	protected String logtag = "MealBooking";
@@ -58,5 +61,26 @@ public class BaseActivity extends Activity {
 		super.onDestroy();
 
 		unbindService(mServiceConn);
+	}
+
+	@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main, menu);
+		menu.setGroupVisible(R.id.MainMenuGroup, true);
+		return true;
+    }
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		switch (item.getItemId()) {
+			case R.id.PreferencesMenuItem:
+				Intent intent = new Intent(this, PreferencesActivity.class);
+				startActivity(intent);
+				break;
+
+		}
+		return false;
 	}
 }

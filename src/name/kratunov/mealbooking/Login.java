@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -99,14 +101,25 @@ public class Login extends BaseActivity {
         automaticLogin.setOnCheckedChangeListener(new CheckboxChangeListener());
         
         if(automaticLogin.isChecked())
-        	new LoginButtonListener().onClick(loginButton);
-	} 
+			loginButton.performClick();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		super.onCreateOptionsMenu(menu);
+		MenuItem logout = menu.findItem(R.id.LogoutMenuItem);
+		if (logout != null)
+			logout.setVisible(false);
+		return true;
+	}
 	
 	private void restoreSettings()
     {
 		Log.d(logtag, "Restoring settings");
 		
-    	SharedPreferences settings = getSharedPreferences("login", 0);    		
+    	SharedPreferences settings = getSharedPreferences(PreferencesActivity.PREFERENCES_KEY, 
+    			MODE_PRIVATE);    		
     	cardnumber.setText(settings.getString("card_number", ""));
     	password.setText(settings.getString("password", ""));
     	automaticLogin.setChecked(settings.getBoolean("automatic", false));
@@ -115,7 +128,8 @@ public class Login extends BaseActivity {
     private void saveSettings()
     {
     	Log.d(logtag, "Saving settings");
-    	SharedPreferences settings = getSharedPreferences("login", 0);
+    	SharedPreferences settings = getSharedPreferences(PreferencesActivity.PREFERENCES_KEY, 
+    			MODE_PRIVATE);
     	SharedPreferences.Editor editor = settings.edit();
     	
 		editor.putString("card_number", cardnumber.getText().toString());

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Update settings">
+        <CheckBoxPreference android:summaryOn="Update the meals list every time you enter it" android:key="updateOnStartup" android:summaryOff="Do not update the meals list automatically" android:title="Update meals on startup" android:defaultValue="true"></CheckBoxPreference>
+    </PreferenceCategory><PreferenceCategory android:title="Display settings">
+        <CheckBoxPreference android:title="Show legend" android:summaryOff="Don't show the legend button under the meals list" android:summaryOn="Show the legend button under the meals list" android:key="guiShowLegend" android:defaultValue="true"></CheckBoxPreference>
+        
+    </PreferenceCategory>
+</PreferenceScreen>
