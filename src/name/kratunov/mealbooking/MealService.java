@@ -1,5 +1,7 @@
 package name.kratunov.mealbooking;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import name.kratunov.mealbooking.HttpScraper.ProgressReporter;
 import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
 import android.app.Service;
@@ -43,6 +45,7 @@ public class MealService extends Service {
 		mHandler = new Handler();
 	}
 
+	private AtomicBoolean backgroundTaskRunning = new AtomicBoolean(false);
 	public void RefreshMeals(boolean blocking, final ProgressReporter reporter)
 	{
 		final ProgressReporter inlineReporter = new ProgressReporter() {
@@ -88,14 +91,15 @@ public class MealService extends Service {
 		};
 		if (blocking)
 			HttpScraper.getInstance().getMeals(inlineReporter);
-		else
+		else if (!backgroundTaskRunning.get())
 		{
 			AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
 				@Override
 				public Void doInBackground(Void... data)
 				{
+					backgroundTaskRunning.set(true);
 					HttpScraper.getInstance().getMeals(inlineReporter);
-
+					backgroundTaskRunning.set(false);
 					return null;
 				}
 			};
