@@ -223,11 +223,6 @@ public class HttpScraper {
 
 		reporter.onProgressStart();
 
-		ContentResolver resolver = Application.getContext()
-				.getContentResolver();
-		resolver.delete(MealsMetadata.CONTENT_URI, "1=1", null);
-		resolver.notifyChange(MealsMetadata.CONTENT_URI, null);
-
 		HttpGet request = new HttpGet(baseUrl+mealsUrl);
 		addCommonHeaders(request);
 		String html = null;

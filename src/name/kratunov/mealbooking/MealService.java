@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import name.kratunov.mealbooking.HttpScraper.ProgressReporter;
 import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -97,6 +98,7 @@ public class MealService extends Service {
 				@Override
 				public Void doInBackground(Void... data)
 				{
+					ClearMeals();
 					backgroundTaskRunning.set(true);
 					HttpScraper.getInstance().getMeals(inlineReporter);
 					backgroundTaskRunning.set(false);
@@ -152,6 +154,15 @@ public class MealService extends Service {
 	public boolean Login(String username, String password)
 	{
 		return HttpScraper.getInstance().login(username, password);
+	}
+	
+	public void ClearMeals()
+	{
+		ContentResolver resolver = Application.getContext().getContentResolver();
+		resolver.delete(MealsMetadata.CONTENT_URI, "1=1", null);
+		resolver.notifyChange(MealsMetadata.CONTENT_URI, null);
+		
+		requery();
 	}
 
 	private void requery()

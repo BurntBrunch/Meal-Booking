@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -87,12 +88,6 @@ public class Login extends BaseActivity {
 	{
 		super.onServiceConnected();
         
-        setContentView(R.layout.login);
-        
-        cardnumber = (EditText) findViewById(R.id.CardNumberEditText);
-        password = (EditText) findViewById(R.id.PasswordEditText);
-        automaticLogin = (CheckBox) findViewById(R.id.AutomaticLoginCheckboxButton);
-        
         restoreSettings();
         
         Button loginButton = (Button) findViewById(R.id.LoginButton);
@@ -102,6 +97,26 @@ public class Login extends BaseActivity {
         
         if(automaticLogin.isChecked())
 			loginButton.performClick();
+	}
+	
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+		
+		restoreSettings();
+	}
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+		
+		setContentView(R.layout.login);
+		
+		cardnumber = (EditText) findViewById(R.id.CardNumberEditText);
+        password = (EditText) findViewById(R.id.PasswordEditText);
+        automaticLogin = (CheckBox) findViewById(R.id.AutomaticLoginCheckboxButton);
 	}
 
 	@Override
@@ -120,9 +135,9 @@ public class Login extends BaseActivity {
 		
     	SharedPreferences settings = getSharedPreferences(PreferencesActivity.PREFERENCES_KEY, 
     			MODE_PRIVATE);    		
-    	cardnumber.setText(settings.getString("card_number", ""));
-    	password.setText(settings.getString("password", ""));
-    	automaticLogin.setChecked(settings.getBoolean("automatic", false));
+    	cardnumber.setText(settings.getString(PreferencesActivity.CARD_NUMBER_KEY, ""));
+    	password.setText(settings.getString(PreferencesActivity.PASSWORD_KEY, ""));
+    	automaticLogin.setChecked(settings.getBoolean(PreferencesActivity.AUTOMATIC_LOGIN_KEY, false));
     }
     
     private void saveSettings()
@@ -132,9 +147,12 @@ public class Login extends BaseActivity {
     			MODE_PRIVATE);
     	SharedPreferences.Editor editor = settings.edit();
     	
-		editor.putString("card_number", cardnumber.getText().toString());
-		editor.putString("password", password.getText().toString());
-		editor.putBoolean("automatic", automaticLogin.isChecked());
+		editor.putString(PreferencesActivity.CARD_NUMBER_KEY, 
+				cardnumber.getText().toString());
+		editor.putString(PreferencesActivity.PASSWORD_KEY, 
+				password.getText().toString());
+		editor.putBoolean(PreferencesActivity.AUTOMATIC_LOGIN_KEY, 
+				automaticLogin.isChecked());
 		editor.commit();
 
     }

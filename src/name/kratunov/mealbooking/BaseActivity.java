@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -79,6 +80,24 @@ public class BaseActivity extends Activity {
 				Intent intent = new Intent(this, PreferencesActivity.class);
 				startActivity(intent);
 				return true;
+			case R.id.LogoutMenuItem:
+				// Remove all the settings
+				Editor editor = getSharedPreferences(PreferencesActivity.PREFERENCES_KEY,
+						MODE_PRIVATE).edit();
+				editor.remove(PreferencesActivity.AUTOMATIC_LOGIN_KEY);
+				editor.remove(PreferencesActivity.CARD_NUMBER_KEY);
+				editor.remove(PreferencesActivity.PASSWORD_KEY);
+				editor.commit();
+				
+				// Clear the database
+				if(mService != null)
+					mService.ClearMeals();
+				
+				// Redirect to the login screen
+				Intent loginIntent = new Intent(this, Login.class);
+				loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|
+						Intent.FLAG_ACTIVITY_SINGLE_TOP);
+				startActivity(loginIntent);
 		}
 		return false;
 	}
