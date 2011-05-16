@@ -78,8 +78,7 @@ public class BaseActivity extends Activity {
 			case R.id.PreferencesMenuItem:
 				Intent intent = new Intent(this, PreferencesActivity.class);
 				startActivity(intent);
-				break;
-
+				return true;
 		}
 		return false;
 	}

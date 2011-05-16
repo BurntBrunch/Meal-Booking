@@ -7,7 +7,7 @@
 			android:icon="@drawable/ic_menu_back"></item>
 	</group>
     
-    <group android:id="@+id/ViewMealsGroup" android:visible="false">
-        <item android:title="Refresh list" android:titleCondensed="Refresh" android:icon="@*android:drawable/ic_menu_refresh" android:id="@+id/RefreshMealsMenuItem"></item>
+    <group android:visible="false" android:id="@+id/ViewMealsMenuGroup">
+        <item android:title="Refresh list" android:titleCondensed="Refresh" android:id="@+id/RefreshMealsMenuItem" android:icon="@drawable/ic_menu_refresh"></item>
     </group>
 </menu>

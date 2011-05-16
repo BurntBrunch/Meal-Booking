@@ -9,6 +9,7 @@ import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -122,8 +123,7 @@ public class ViewMeals extends BaseActivity {
 				@Override
 				public void onCancel(DialogInterface dialog) {
 					dialog.dismiss();
-					Editor editor = getSharedPreferences(PreferencesActivity.PREFERENCES_KEY,
-							0).edit();
+					Editor editor = mSharedPrefs.edit();
 					editor.putBoolean(PreferencesActivity.SHOW_LEGEND_KEY,
 							!box.isChecked());
 					editor.commit();
@@ -188,6 +188,9 @@ public class ViewMeals extends BaseActivity {
 		super.onCreate(sa);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setTitle(R.string.mealsList);
+		
+		mSharedPrefs = getSharedPreferences(PreferencesActivity.PREFERENCES_KEY, 
+				MODE_PRIVATE);
 	}
 	
 	@Override
@@ -220,6 +223,7 @@ public class ViewMeals extends BaseActivity {
 
 		}
 	};
+	private SharedPreferences mSharedPrefs;
 
 	@Override
 	protected void onServiceConnected()
@@ -230,8 +234,9 @@ public class ViewMeals extends BaseActivity {
 			finish(); // sanity check
 
 		initializeViews();
-
-		mService.RefreshMeals(false, progressReporter);
+		
+		if(mSharedPrefs.getBoolean(PreferencesActivity.UPDATE_STARTUP_KEY, true))
+			mService.RefreshMeals(false, progressReporter);
 	}
 
     // Called from GetMealsTask.onPostExecute
@@ -371,8 +376,7 @@ public class ViewMeals extends BaseActivity {
     
     public void syncLegendButton()
     {
-		boolean legendShow = getSharedPreferences(
-				PreferencesActivity.PREFERENCES_KEY, 0).getBoolean(
+		boolean legendShow = mSharedPrefs.getBoolean(
 				PreferencesActivity.SHOW_LEGEND_KEY, true);
     	
 		View legendBtn = findViewById(R.id.LegendButton);
@@ -488,9 +492,23 @@ public class ViewMeals extends BaseActivity {
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		super.onCreateOptionsMenu(menu);
+		menu.setGroupVisible(R.id.ViewMealsMenuGroup, true);
 		return true;
 	}
-
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		super.onOptionsItemSelected(item);
+		switch(item.getItemId())
+		{
+			case R.id.RefreshMealsMenuItem:
+				mService.RefreshMeals(false, progressReporter);
+				return true;
+		}
+		return false;
+	}
+	
     private void changeItem(Uri mealUri)
     {
 		Intent intent = new Intent("name.kratunov.mealbooking.CHANGE_MEAL");
