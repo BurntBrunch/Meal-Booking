@@ -4,6 +4,7 @@ import name.kratunov.mealbooking.HttpScraper.ProgressReporter;
 import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
 import name.kratunov.mealbooking.R.drawable;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
@@ -531,10 +532,33 @@ public class ViewMeals extends BaseActivity {
 		startActivityForResult(intent, MENU_BOOK);		
     }
     // Starts the CancelMealTask background task given an index in the meals list
-    private void cancelItem(Uri mealUri)
+    private void cancelItem(final Uri mealUri)
     {
-		CancelMealTask task = new CancelMealTask();
-		task.execute(mealUri);
+    	Builder bld = new AlertDialog.Builder(this);
+    	bld.setTitle("Confirm cancellation").
+    	setMessage("Do you really wish to cancel this meal?").
+    	setCancelable(true).
+    	setNegativeButton("No",new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which)
+			{
+				dialog.cancel();
+			}
+		}).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which)
+			{
+				dialog.dismiss();
+				CancelMealTask task = new CancelMealTask();
+				task.execute(mealUri);
+			}
+		}).setOnCancelListener(new OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialog)
+			{
+				dialog.dismiss();
+			}
+		}).show();
     }
     
     private class GetDetailsTask extends AsyncTask<Uri, Void, String>
