@@ -47,13 +47,21 @@ public class MealService extends Service {
 	}
 
 	private AtomicBoolean backgroundTaskRunning = new AtomicBoolean(false);
+	private boolean requery = true;
+	public void FreezeRequeries()
+	{
+		requery = false;
+	}
+	public void ThawRequeries()
+	{
+		requery = true;
+	}
 	public void RefreshMeals(boolean blocking, final ProgressReporter reporter)
 	{
 		final ProgressReporter inlineReporter = new ProgressReporter() {
 			@Override
 			public void onProgressStart()
 			{
-				requery();
 				if (reporter != null)
 					mHandler.post(new Runnable() {
 						@Override
@@ -62,11 +70,11 @@ public class MealService extends Service {
 							reporter.onProgressStart();
 						}
 					});
+				requery();
 			}
 			@Override
 			public void onProgressEnd()
 			{
-				requery();
 				if (reporter != null)
 					mHandler.post(new Runnable() {
 						@Override
@@ -75,11 +83,11 @@ public class MealService extends Service {
 							reporter.onProgressEnd();
 						}
 					});
+				requery();
 			}
 			@Override
 			public void onProgress(final int n, final int cnt)
 			{
-				requery();
 				if (reporter != null)
 					mHandler.post(new Runnable() {
 						@Override
@@ -88,6 +96,7 @@ public class MealService extends Service {
 							reporter.onProgress(n, cnt);
 						}
 					});
+				requery();
 			}
 		};
 		if (blocking)
@@ -167,12 +176,13 @@ public class MealService extends Service {
 
 	private void requery()
 	{
-		mHandler.post(new Runnable() {
-			@Override
-			public void run()
-			{
-				mMealsCursor.requery();
-			}
-		});
+		if(requery)
+			mHandler.post(new Runnable() {
+				@Override
+				public void run()
+				{
+					mMealsCursor.requery();
+				}
+			});
 	}
 }

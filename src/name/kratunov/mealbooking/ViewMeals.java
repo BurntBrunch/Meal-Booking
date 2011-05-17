@@ -207,6 +207,8 @@ public class ViewMeals extends BaseActivity {
 			// setProgress(Window.PROGRESS_INDETERMINATE_ON);
 			setProgressBarIndeterminateVisibility(true);
 			setTitle(R.string.mealsRefresh);
+			
+			mService.FreezeRequeries();
 		}
 
 		@Override
@@ -215,6 +217,8 @@ public class ViewMeals extends BaseActivity {
 			// setProgress(Window.PROGRESS_INDETERMINATE_OFF);
 			setProgressBarIndeterminateVisibility(false);
 			setTitle(R.string.mealsList);
+			
+			mService.ThawRequeries();
 		}
 
 		@Override
