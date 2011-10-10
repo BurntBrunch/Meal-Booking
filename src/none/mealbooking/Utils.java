@@ -1,4 +1,4 @@
-package name.kratunov.mealbooking;
+package none.mealbooking;
 
 public class Utils {
 	static public String concatStringArray(String[] array, char delim)

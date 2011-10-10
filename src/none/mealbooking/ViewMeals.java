@@ -1,8 +1,12 @@
-package name.kratunov.mealbooking;
+package none.mealbooking;
 
-import name.kratunov.mealbooking.HttpScraper.ProgressReporter;
-import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
-import name.kratunov.mealbooking.R.drawable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import none.mealbooking.HttpScraper.ProgressReporter;
+import none.mealbooking.MealsContentProviderHelpers.MealsMetadata;
+import none.mealbooking.R.drawable;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
@@ -352,7 +356,18 @@ public class ViewMeals extends BaseActivity {
 				/* Handle the text */
 				if (view instanceof TextView)
 				{
-					StringBuilder strBld = new StringBuilder(date);
+					SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd");
+					SimpleDateFormat userFormat = new SimpleDateFormat("dd/MM/yy");
+					Date dateObj;
+					StringBuilder strBld = new StringBuilder();
+					try
+					{
+						dateObj = isoFormat.parse(date);
+						strBld.append(userFormat.format(dateObj));
+					} catch (ParseException e)
+					{
+						strBld.append(date);
+					}
 					strBld.append(" ");
 					strBld.append(time);
 					strBld.append("\n");

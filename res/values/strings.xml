@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <string name="app_name">Meal Booking</string>
+    <string name="app_name">Keble Meal Booking</string>
 <string name="initialLoginMessage">Please enter your card number and password below:</string>
 <string name="cardnumberHint">Card number</string>
 <string name="passwordHint">Password</string>

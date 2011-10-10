@@ -1,6 +1,6 @@
-package name.kratunov.mealbooking;
+package none.mealbooking;
 
-import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
+import none.mealbooking.MealsContentProviderHelpers.MealsMetadata;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;

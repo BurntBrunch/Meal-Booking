@@ -1,9 +1,9 @@
-package name.kratunov.mealbooking;
+package none.mealbooking;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import name.kratunov.mealbooking.HttpScraper.ProgressReporter;
-import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
+import none.mealbooking.HttpScraper.ProgressReporter;
+import none.mealbooking.MealsContentProviderHelpers.MealsMetadata;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -42,7 +42,7 @@ public class MealService extends Service {
 	{
 		super.onCreate();
 		mMealsCursor = getContentResolver().query(MealsMetadata.CONTENT_URI,
-				null, null, null, null);
+				null, null, null, MealsMetadata.DATE);
 		mHandler = new Handler();
 	}
 

@@ -1,14 +1,16 @@
-package name.kratunov.mealbooking;
+package none.mealbooking;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
+import none.mealbooking.MealsContentProviderHelpers.MealsMetadata;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -47,7 +49,7 @@ public class HttpScraper {
 	final private String cancelUrl = "cancelbooking.php";
 	final private String menuUrl = "sittingmenu.php";
 	final private String infoUrl = "sittinginfo.php";
-	
+
 	final private String logtag = "MealBooking";
 
 	final private String userAgent = "MealBooking Android/0.01a";
@@ -56,35 +58,45 @@ public class HttpScraper {
 
 	private boolean loggedIn = false;
 
-	private HttpScraper() {
+	private HttpScraper()
+	{
 		client.getParams().setParameter("http.protocol.cookie-policy",
 				CookiePolicy.BROWSER_COMPATIBILITY);
 		client.getParams().setParameter("http.protocol.expect-continue", false);
 	}
-	
+
 	static private HttpScraper singleton = null;
-	static public HttpScraper getInstance() {
-		if(HttpScraper.singleton == null)
+
+	static public HttpScraper getInstance()
+	{
+		if (HttpScraper.singleton == null)
 			HttpScraper.singleton = new HttpScraper();
 		return HttpScraper.singleton;
 	}
 
-	private void addCommonHeaders(AbstractHttpMessage request) {
-		request.addHeader("Referer", baseUrl+cookieUrl);
+	private void addCommonHeaders(AbstractHttpMessage request)
+	{
+		request.addHeader("Referer", baseUrl + cookieUrl);
 		request.addHeader("User-Agent", userAgent);
 	}
-	private String getResponseEntity(HttpResponse response) {
+
+	private String getResponseEntity(HttpResponse response)
+	{
 		HttpEntity entity = response.getEntity();
-		if (entity != null) {
+		if (entity != null)
+		{
 			Log.v(logtag, "Entity length: " + entity.getContentLength());
-			try {
+			try
+			{
 				String res = EntityUtils.toString(entity);
 				return res;
-			} catch (ParseException e) {
+			} catch (ParseException e)
+			{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return null;
-			} catch (IOException e) {
+			} catch (IOException e)
+			{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return null;
@@ -92,39 +104,46 @@ public class HttpScraper {
 		} else
 			return null;
 	}
+
 	private String executeRequest(HttpUriRequest request, boolean getResponse)
 	{
 		HttpResponse response = null;
 		String content = null;
-		try {
+		try
+		{
 			response = client.execute(request);
 			Log.v(logtag, response.getStatusLine().toString());
-			if(getResponse)
+			if (getResponse)
 				content = getResponseEntity(response);
 
-		} catch (ClientProtocolException e) {
+		} catch (ClientProtocolException e)
+		{
 			Log.e(logtag, "Could not execute request " + request.toString(), e);
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			Log.e(logtag, "IO error" + request.toString(), e);
 		}
-		
+
 		return content;
 	}
-	
+
 	// This method uses the default parser and if it fails, resorts to the
 	// more inefficient greedy parsing
-	private int parseInt(String num) {
+	private int parseInt(String num)
+	{
 		// 0xA0 is non-breaking space
 		String tmp = num.replace((char) 0xA0, ' ').trim();
 		int res;
-		try {
+		try
+		{
 			res = Integer.parseInt(tmp);
-		} catch (NumberFormatException e) {
+		} catch (NumberFormatException e)
+		{
 			byte[] bytes = tmp.getBytes();
 			int count = 0;
 			while (count < bytes.length && Character.isDigit(bytes[count]))
 				count++;
-			
+
 			if (count > 0)
 				res = Integer.parseInt(new String(bytes, 0, count));
 			else
@@ -134,31 +153,35 @@ public class HttpScraper {
 		return res;
 	}
 
-	public boolean login(String username, String password) {
-		if(isLoggedIn())
+	public boolean login(String username, String password)
+	{
+		if (isLoggedIn())
 			return true;
-		
+
 		// Do a normal GET request to accquire a PHP session id
-		HttpGet cookierequest = new HttpGet(baseUrl+cookieUrl);
+		HttpGet cookierequest = new HttpGet(baseUrl + cookieUrl);
 		addCommonHeaders(cookierequest);
 
-		try {
+		try
+		{
 			HttpResponse response = client.execute(cookierequest);
 			Header[] cookies = response.getHeaders("Set-Cookie");
 
 			for (int i = 0; i < cookies.length; i++)
 				Log.d(logtag, cookies[i].toString());
 
-		} catch (ClientProtocolException e2) {
+		} catch (ClientProtocolException e2)
+		{
 			Log.e(logtag, "Protocol exception", e2);
 			return false;
-		} catch (IOException e2) {
+		} catch (IOException e2)
+		{
 			Log.e(logtag, "IO exception", e2);
 			return false;
 		}
 
 		// Now that we have a session id, try to log us in
-		HttpPost request = new HttpPost(baseUrl+loginUrl);
+		HttpPost request = new HttpPost(baseUrl + loginUrl);
 		addCommonHeaders(request);
 		request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -171,9 +194,11 @@ public class HttpScraper {
 
 		String loginData = URLEncodedUtils.format(params, "UTF-8");
 		StringEntity loginEntity = null;
-		try {
+		try
+		{
 			loginEntity = new StringEntity(loginData);
-		} catch (UnsupportedEncodingException e1) {
+		} catch (UnsupportedEncodingException e1)
+		{
 			Log.d(logtag, "UnsupportedEncoding", e1);
 			e1.printStackTrace();
 		}
@@ -182,7 +207,8 @@ public class HttpScraper {
 		Log.d(logtag, "Login POST data is: " + loginData);
 		String content = executeRequest(request, true);
 
-		if (content.toLowerCase().contains("error")) {
+		if (content.toLowerCase().contains("error"))
+		{
 			Log.d(logtag, "Received an error");
 			return false;
 		}
@@ -202,10 +228,12 @@ public class HttpScraper {
 
 		return true;
 	}
-	public boolean isLoggedIn() {
+
+	public boolean isLoggedIn()
+	{
 		return loggedIn;
 	}
-	
+
 	public interface ProgressReporter {
 		public void onProgressStart();
 
@@ -216,41 +244,46 @@ public class HttpScraper {
 
 	public boolean getMeals(ProgressReporter reporter)
 	{
-		if (!isLoggedIn()) {
+		if (!isLoggedIn())
+		{
 			Log.e(logtag, "Must be logged in to get meal list");
 			return false;
 		}
 
 		reporter.onProgressStart();
 
-		HttpGet request = new HttpGet(baseUrl+mealsUrl);
+		HttpGet request = new HttpGet(baseUrl + mealsUrl);
 		addCommonHeaders(request);
 		String html = null;
-		try {
+		try
+		{
 			HttpResponse response = client.execute(request);
 			html = getResponseEntity(response);
-		} catch (ClientProtocolException e) {
+		} catch (ClientProtocolException e)
+		{
 			Log.e(logtag, "Could not get a session id", e);
 			e.printStackTrace();
 			reporter.onProgressEnd();
 			return false;
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			Log.e(logtag, "Could not get a session id", e);
 			e.printStackTrace();
 			reporter.onProgressEnd();
 			return false;
 		}
 
-		if(html == null)
+		if (html == null)
 		{
 			reporter.onProgressEnd();
 			return false;
 		}
-		
+
 		Document doc = Jsoup.parse(html);
 		Elements rows = doc.select("table > tr.RowAS1");
 
-		if (rows.isEmpty()) {
+		if (rows.isEmpty())
+		{
 			Log.e(logtag, "Could not get the rows in the table");
 			reporter.onProgressEnd();
 			return false;
@@ -259,12 +292,14 @@ public class HttpScraper {
 
 		List<Meal> meals = new ArrayList<Meal>();
 
-		for (Element row: rows) {
+		for (Element row : rows)
+		{
 			Meal meal = new Meal();
 
 			// The id is hidden in the input fields
 			Elements ids = row.select("input[name=sitUniq]");
-			if (ids.isEmpty()) {
+			if (ids.isEmpty())
+			{
 				Log.w(logtag, "Could not retrieve id. Moving on.");
 				continue;
 			}
@@ -277,57 +312,82 @@ public class HttpScraper {
 			// The info cells are in the following order:
 			// Date, Time, Spaces, Max Guests, Booked
 			int count = 1;
-			for (Element elem : info) {
+			for (Element elem : info)
+			{
 				if (!elem.hasText())
 					continue;
 				switch (count) {
-				case 1:
-					meal.date = elem.text().trim();
-					count++;
-					break;
-				case 2:
-					meal.time = elem.text().trim();
-					count++;
-					break;
-				case 3:
-					meal.spaces = parseInt(elem.text());
-					count++;
-					break;
-				case 4:
-					meal.guests = parseInt(elem.text());
-					count++;
-					break;
-				case 5:
-					meal.booked = parseInt(elem.text());
-					count++;
-					break;
-				default:
-					Log.e(logtag,
-							"Non-empty info cell which we can't deal with!");
+					case 1:
+						String dateStr = elem.text().trim();
+						SimpleDateFormat format = new SimpleDateFormat(
+								"EEE, dd/MM/yy");
+						Date dateParsed;
+						try
+						{
+							dateParsed = format.parse(dateStr);
+
+							SimpleDateFormat isoFormat = new SimpleDateFormat(
+									"yyyy-MM-dd");
+							meal.date = isoFormat.format(dateParsed);
+						} catch (java.text.ParseException e)
+						{
+							meal.date = dateStr;
+						}
+
+						count++;
+						break;
+					case 2:
+						meal.time = elem.text().trim();
+						count++;
+						break;
+					case 3:
+						meal.spaces = parseInt(elem.text());
+						count++;
+						break;
+					case 4:
+						meal.guests = parseInt(elem.text());
+						count++;
+						break;
+					case 5:
+						meal.booked = parseInt(elem.text());
+						count++;
+						break;
+					default:
+						Log.e(logtag,
+								"Non-empty info cell which we can't deal with!");
 						reporter.onProgressEnd();
 						return true; // return what we have so far
 				}
 			}
 
 			String title = row.select("th").get(1).text();
-			
-			// 0xA0 is the Unicode non-breaking space character, which jsoup 
+
+			// 0xA0 is the Unicode non-breaking space character, which jsoup
 			// likes to use for &nbsp;
-			title = title.replace(" )", ")").replace((char)0xA0, ' ').replace("  ", " ").trim();
+			title = title.replace(" )", ")").replace((char) 0xA0, ' ')
+					.replace("  ", " ").trim();
 			meal.sitting = title;
-			
+
 			// Check the forms to get the capabilities
-			if(row.select("form[action="+changeUrl+"] > input[type=submit]").size() > 0)
+			if (row.select(
+					"form[action=" + changeUrl + "] > input[type=submit]")
+					.size() > 0)
 				meal.can_change = true;
-			if(row.select("form[action="+cancelUrl+"] > input[type=submit]").size() > 0)
+			if (row.select(
+					"form[action=" + cancelUrl + "] > input[type=submit]")
+					.size() > 0)
 				meal.can_cancel = true;
-			if(row.select("form[action="+bookGetUrl+"] > input[type=submit][value=Book]").size() > 0)
+			if (row.select(
+					"form[action=" + bookGetUrl
+							+ "] > input[type=submit][value=Book]").size() > 0)
 				meal.can_book = true;
-			if(row.select("form[action="+menuUrl+"] > input[type=submit]").size() > 0)
+			if (row.select("form[action=" + menuUrl + "] > input[type=submit]")
+					.size() > 0)
 				meal.has_menu = true;
-			if(row.select("form[action="+infoUrl+"] > input[type=submit]").size() > 0)
+			if (row.select("form[action=" + infoUrl + "] > input[type=submit]")
+					.size() > 0)
 				meal.has_info = true;
-			
+
 			meals.add(meal);
 			addToContentProvider(meal);
 			reporter.onProgress(rows.indexOf(row), rows.size());
@@ -335,6 +395,7 @@ public class HttpScraper {
 		reporter.onProgressEnd();
 		return true;
 	}
+
 	private void addToContentProvider(Meal meal)
 	{
 		ContentValues vals = new ContentValues();
@@ -350,16 +411,17 @@ public class HttpScraper {
 		vals.put(MealsMetadata.CAN_BOOK, meal.can_book ? 1 : 0);
 		vals.put(MealsMetadata.CAN_CANCEL, meal.can_cancel ? 1 : 0);
 		vals.put(MealsMetadata.CAN_CHANGE, meal.can_change ? 1 : 0);
-		
-		ContentResolver resolver = Application.getContext().getContentResolver();
-		
+
+		ContentResolver resolver = Application.getContext()
+				.getContentResolver();
+
 		resolver.insert(MealsMetadata.CONTENT_URI, vals);
 		resolver.notifyChange(MealsMetadata.CONTENT_URI, null);
 	}
 
 	public String[] getMenu(final int id)
 	{
-		HttpPost request = new HttpPost(baseUrl+menuUrl);
+		HttpPost request = new HttpPost(baseUrl + menuUrl);
 		addCommonHeaders(request);
 		request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -369,48 +431,50 @@ public class HttpScraper {
 
 		String menuData = URLEncodedUtils.format(params, "UTF-8");
 		StringEntity menuEntity = null;
-		try {
+		try
+		{
 			menuEntity = new StringEntity(menuData);
-		} catch (UnsupportedEncodingException e1) {
+		} catch (UnsupportedEncodingException e1)
+		{
 			Log.d(logtag, "UnsupportedEncoding", e1);
 			e1.printStackTrace();
 		}
 
 		request.setEntity(menuEntity);
 		String content = executeRequest(request, true);
-		
+
 		Document doc = Jsoup.parse(content);
 		Elements rows = doc.select("td[align=center]");
-		if(rows.size() == 0)
+		if (rows.size() == 0)
 		{
 			Log.d(logtag, "Could not get menu for meal " + Integer.toString(id));
 			return null;
-		}
-		else
-			Log.d(logtag, "Got menu for meal " + Integer.toString(id) + ": ~" + rows.size() +
-					" items");
-		
+		} else
+			Log.d(logtag, "Got menu for meal " + Integer.toString(id) + ": ~"
+					+ rows.size() + " items");
+
 		String[] menu = new String[rows.size()];
-		int i =0;
-		
-		for(Element elem: rows)
+		int i = 0;
+
+		for (Element elem : rows)
 		{
-			if(!elem.hasText())
+			if (!elem.hasText())
 				continue;
-			
-			menu[i++] = elem.text().replace((char)0xA0, ' ').trim();
+
+			menu[i++] = elem.text().replace((char) 0xA0, ' ').trim();
 		}
-		
+
 		return menu;
 	}
-	
-	public String[] getMenu(final Uri uri) {
+
+	public String[] getMenu(final Uri uri)
+	{
 		return getMenu(Integer.parseInt(uri.getLastPathSegment()));
 	}
-	
+
 	public String getInfo(final int id)
 	{
-		HttpPost request = new HttpPost(baseUrl+infoUrl);
+		HttpPost request = new HttpPost(baseUrl + infoUrl);
 		addCommonHeaders(request);
 		request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -420,40 +484,43 @@ public class HttpScraper {
 
 		String infoData = URLEncodedUtils.format(params, "UTF-8");
 		StringEntity infoEntity = null;
-		try {
+		try
+		{
 			infoEntity = new StringEntity(infoData);
-		} catch (UnsupportedEncodingException e1) {
+		} catch (UnsupportedEncodingException e1)
+		{
 			Log.d(logtag, "UnsupportedEncoding", e1);
 			e1.printStackTrace();
 		}
 
 		request.setEntity(infoEntity);
 		String content = executeRequest(request, true);
-		
+
 		Document doc = Jsoup.parse(content);
 		Elements text = doc.select("td > p[align=center]");
 		String info = text.first().text().replace((char) 0xA0, ' ').trim();
-		if(info.length() == 0)
+		if (info.length() == 0)
 		{
 			Log.d(logtag, "Could not get info for meal " + Integer.toString(id));
 			return null;
-		}
-		else
+		} else
 			Log.d(logtag, "Got info for meal " + Integer.toString(id));
-		
+
 		return info;
 	}
-	public String getInfo(final Uri uri) {
+
+	public String getInfo(final Uri uri)
+	{
 		return getInfo(Integer.parseInt(uri.getLastPathSegment()));
 	}
-	
+
 	protected BookingInfo getBookingInfo(final int id, boolean useChangeUrl)
 	{
 		HttpPost request;
-		if(useChangeUrl)
-			request = new HttpPost(baseUrl+changeUrl);
+		if (useChangeUrl)
+			request = new HttpPost(baseUrl + changeUrl);
 		else
-			request = new HttpPost(baseUrl+bookGetUrl);
+			request = new HttpPost(baseUrl + bookGetUrl);
 		addCommonHeaders(request);
 		request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -463,123 +530,135 @@ public class HttpScraper {
 
 		String bookData = URLEncodedUtils.format(params, "UTF-8");
 		StringEntity bookEntity = null;
-		try {
+		try
+		{
 			bookEntity = new StringEntity(bookData);
-		} catch (UnsupportedEncodingException e1) {
+		} catch (UnsupportedEncodingException e1)
+		{
 			Log.d(logtag, "UnsupportedEncoding", e1);
 			e1.printStackTrace();
 		}
 
 		request.setEntity(bookEntity);
 		String content = executeRequest(request, true);
-		
+
 		Document doc = Jsoup.parse(content);
 		Elements meals_elems = doc.select("select[name=lstMeals] > option");
 		Map<String, String> meals = new LinkedHashMap<String, String>();
 		String meal_choice = null;
-		
-		for(Element elem: meals_elems)
+
+		for (Element elem : meals_elems)
 		{
 			meals.put(elem.text(), elem.attr("value"));
-			if(elem.hasAttr("selected"))
+			if (elem.hasAttr("selected"))
 				meal_choice = elem.text();
 		}
-		
+
 		Elements diet_elems = doc.select("select[name=lstSpecDiet] > option");
 		Map<String, String> diets = new LinkedHashMap<String, String>();
 		String diet_choice = null;
-		
-		for(Element elem: diet_elems)
+
+		for (Element elem : diet_elems)
 		{
 			diets.put(elem.text().trim(), elem.attr("value"));
-			if(elem.hasAttr("selected"))
+			if (elem.hasAttr("selected"))
 				diet_choice = elem.text();
 		}
-		
+
 		BookingInfo res = new BookingInfo();
-		
-		if(useChangeUrl)
+
+		if (useChangeUrl)
 		{
 			Map<String, String> extra = null;
 			Elements hidden = doc.select("input[name=hidBk_Uniq]");
-			if(hidden.size() > 0)
+			if (hidden.size() > 0)
 			{
 				extra = new LinkedHashMap<String, String>();
 				Element elem = hidden.first();
-				if(elem.attr("value").trim().length() > 0)
+				if (elem.attr("value").trim().length() > 0)
 					extra.put(elem.attr("name"), elem.attr("value"));
 			}
 			res.secrets = extra;
 		}
-		
+
 		res.meal_choice = meal_choice;
 		res.diet_choice = diet_choice;
 		res.dietary_requirements = diets;
 		res.meals = meals;
 		res.id = id;
-		
+
 		return res;
 	}
-	
+
 	protected BookingInfo getBookingInfo(final Uri uri, boolean useChangeUrl)
 	{
-		return getBookingInfo(Integer.parseInt(uri.getLastPathSegment()), useChangeUrl);
+		return getBookingInfo(Integer.parseInt(uri.getLastPathSegment()),
+				useChangeUrl);
 	}
-	
+
 	public boolean bookMeal(final BookingInfo info)
 	{
-		HttpPost request = new HttpPost(baseUrl+bookPostUrl);
-		
+		HttpPost request = new HttpPost(baseUrl + bookPostUrl);
+
 		addCommonHeaders(request);
 		request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
-		params.add(new BasicNameValuePair("lstMeals", info.meals.get(info.meal_choice)));
-		params.add(new BasicNameValuePair("lstSpecDiet", info.dietary_requirements.get(info.diet_choice)));
-		params.add(new BasicNameValuePair("txtSpecDietInfo", info.additional_dietary));
+		params.add(new BasicNameValuePair("lstMeals", info.meals
+				.get(info.meal_choice)));
+		params.add(new BasicNameValuePair("lstSpecDiet",
+				info.dietary_requirements.get(info.diet_choice)));
+		params.add(new BasicNameValuePair("txtSpecDietInfo",
+				info.additional_dietary));
 		params.add(new BasicNameValuePair("txtXtraInfo", info.additional_info));
 		params.add(new BasicNameValuePair("hidXtra", ""));
-		params.add(new BasicNameValuePair("hidSit_Uniq", Integer.toString(info.id)));
-		if(info.secrets != null)
-			for(Entry<String, String> entry: info.secrets.entrySet())
-				params.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
-		
+		params.add(new BasicNameValuePair("hidSit_Uniq", Integer
+				.toString(info.id)));
+		if (info.secrets != null)
+			for (Entry<String, String> entry : info.secrets.entrySet())
+				params.add(new BasicNameValuePair(entry.getKey(), entry
+						.getValue()));
+
 		String bookData = URLEncodedUtils.format(params, "UTF-8");
 		StringEntity bookEntity = null;
-		try {
+		try
+		{
 			bookEntity = new StringEntity(bookData);
-		} catch (UnsupportedEncodingException e1) {
+		} catch (UnsupportedEncodingException e1)
+		{
 			Log.d(logtag, "UnsupportedEncoding", e1);
 			e1.printStackTrace();
 		}
 
 		request.setEntity(bookEntity);
-		
+
 		@SuppressWarnings("unused")
 		String response = executeRequest(request, false);
-		
+
 		// TODO: Handle fail conditions
-		
-		ContentResolver resolver = Application.getContext().getContentResolver();
+
+		ContentResolver resolver = Application.getContext()
+				.getContentResolver();
 		ContentValues vals = new ContentValues();
 		vals.put(MealsMetadata.CAN_BOOK, 0);
 		vals.put(MealsMetadata.CAN_CANCEL, 1);
 		vals.put(MealsMetadata.CAN_CHANGE, 1);
 		vals.put(MealsMetadata.BOOKED_GUESTS, 1);
-		
-		Uri mealUri = Uri.withAppendedPath(MealsMetadata.CONTENT_URI, 
+
+		Uri mealUri = Uri.withAppendedPath(MealsMetadata.CONTENT_URI,
 				Integer.toString(info.id));
-		
+
 		resolver.update(mealUri, vals, null, null);
 		resolver.notifyChange(mealUri, null);
-		
+
 		return true;
 	}
+
 	public boolean cancelMeal(final int id)
 	{
 		assert id > 0;
-		HttpPost request = new HttpPost(baseUrl+cancelUrl);
-		
+		HttpPost request = new HttpPost(baseUrl + cancelUrl);
+
 		addCommonHeaders(request);
 		request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -589,34 +668,37 @@ public class HttpScraper {
 
 		String cancelData = URLEncodedUtils.format(params, "UTF-8");
 		StringEntity cancelEntity = null;
-		try {
+		try
+		{
 			cancelEntity = new StringEntity(cancelData);
-		} catch (UnsupportedEncodingException e1) {
+		} catch (UnsupportedEncodingException e1)
+		{
 			Log.d(logtag, "UnsupportedEncoding", e1);
 			e1.printStackTrace();
 		}
 
 		request.setEntity(cancelEntity);
-		
+
 		@SuppressWarnings("unused")
 		String response = executeRequest(request, false);
-		
+
 		// TODO: Handle fail conditions
-		ContentResolver resolver = Application.getContext().getContentResolver();
+		ContentResolver resolver = Application.getContext()
+				.getContentResolver();
 		ContentValues vals = new ContentValues();
 		vals.put(MealsMetadata.CAN_BOOK, 1);
 		vals.put(MealsMetadata.CAN_CANCEL, 0);
 		vals.put(MealsMetadata.CAN_CHANGE, 0);
 		vals.put(MealsMetadata.BOOKED_GUESTS, 0);
-		
-		Uri mealUri = Uri.withAppendedPath(MealsMetadata.CONTENT_URI, 
+
+		Uri mealUri = Uri.withAppendedPath(MealsMetadata.CONTENT_URI,
 				Integer.toString(id));
-		
+
 		resolver.update(mealUri, vals, null, null);
 		resolver.notifyChange(mealUri, null);
 		return true;
 	}
-	
+
 	public boolean cancelMeal(final Uri uri)
 	{
 		return cancelMeal(Integer.parseInt(uri.getLastPathSegment()));

@@ -1,6 +1,6 @@
-package name.kratunov.mealbooking;
+package none.mealbooking;
 
-import name.kratunov.mealbooking.MealService.ServiceBinder;
+import none.mealbooking.MealService.ServiceBinder;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;

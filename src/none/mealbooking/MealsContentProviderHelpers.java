@@ -1,4 +1,4 @@
-package name.kratunov.mealbooking;
+package none.mealbooking;
 
 import android.net.Uri;
 import android.provider.BaseColumns;

@@ -1,9 +1,9 @@
-package name.kratunov.mealbooking;
+package none.mealbooking;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import name.kratunov.mealbooking.MealsContentProviderHelpers.MealsMetadata;
+import none.mealbooking.MealsContentProviderHelpers.MealsMetadata;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;

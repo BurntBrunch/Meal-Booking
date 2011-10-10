@@ -1,4 +1,4 @@
-package name.kratunov.mealbooking;
+package none.mealbooking;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
